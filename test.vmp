@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document>
+	<LicenseManager
+		ProductCode="6rIktGJdjzY="
+		Algorithm="RSA"
+		Bits="2048"
+		PublicExp="AAEAAQ=="
+		PrivateExp="BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
+		Modulus="7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ=="
+		>
+		<License
+			Date="2015-12-24"
+			CustomerName="Test Name"
+			CustomerEmail="test@email.com"
+			SerialNumber="b2HUC5SA0qqHSmJHAJe+pM9Q5sey+iqCqkW3e0cK8R3kSxlGsFrVzVJ/OZ5etJ8DeDHCKBbmismtwd3I9uzJwitfR/NJJ93u/n/5J0RFDAkklyJ+A23mEDtdwP/w/LS97jvFMfXwX0SMBtQ28948iraiu7VeruU9SZcUerlPLtXj4AKoUOzfciWYJ9xDMA+daJOFioMd7zNZ2AW7bz8PB9+X5Vrtg6fg7QPaJuuXBqkQyxKaoBm/YCcVNBST0LpP0upDV/FDAhHXJL6hjvt55RE6vdHt75othC9diQAIxREN8JhrGkZnOGEypwB5wBCGYeD43bc8s+AM3P7AtUlxxg=="
+		/>
+		<License
+			Date="2015-12-24"
+			CustomerName="Иван Петров"
+			CustomerEmail="иван@петров.рф"
+			SerialNumber="tCSbx9HaC2k4m1X+gfJp3W9g8G86yD3NveCZ+a8TIS08giioeH7xWzuKekcuBXcBp46FpwNi/JpCyyAIPbv/O5twD+acrmINsnq10uBbgIAw8UXIc8RrfIfnQUtbvXDyXpky7NF68BcSBuLSrANqeK2fA07BnE07Nit8BclAIknzYpQp/fp7oPOiil3PIwqh+it3Y060UBEMggnf9GIGhfm+vFkgp90eCFaGJA3l/FFXkQ6S76kq4d+32H8Gv2O1FFol17sgOmWEU1t9VTHXHA/7l+H2LssJyMeEHQ70yWekjiznX270t4jML6iYTFzqk4d6nZl4KO4xTJBpd7hX/w=="
+		/>
+		<License
+			Date="2015-12-24"
+			CustomerName="John Doe"
+			CustomerEmail="john@doe.com"
+			SerialNumber="q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
+		/>
+	</LicenseManager>
+</Document>
