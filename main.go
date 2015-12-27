@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 	"time"
 )
 
@@ -14,6 +15,8 @@ type License struct {
 	HardwareId           []byte
 	RunningTimeLimit     int
 	UserData             []byte
+	ProductCode          string
+	Version              int
 }
 
 var exported_algorithm string = "RSA"
@@ -23,10 +26,6 @@ var exported_modulus string = "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3
 var exported_product_code string = "6rIktGJdjzY="
 
 var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
-
-func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
-	return nil, errors.New("not implemented")
-}
 
 func base10Encode(str string) (string) {
 	var result = big.NewInt(0)
@@ -106,4 +105,37 @@ func decodeSerial(binary string) (string) {
 	binary = base10Encode(binary);
 	binary = powmod(binary, base10Encode(string(public)), base10Encode(string(modulus)));
 	return base10Decode(binary);
+}
+
+func unpackSerial(binary string) (*License, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
+	_serial, err := base64.StdEncoding.DecodeString(serial)
+	serial = string(_serial)
+
+	if err != nil {
+		fmt.Printf("Error in ParseLicense, invalid serial number encoding")
+		return nil, errors.New("Invalid serial number encoding")
+	} else if len(serial) < 240 || len(serial) > 260 {
+		return nil, errors.New("Invalid length")
+	} else {
+		binary := decodeSerial(serial);
+		license, err := unpackSerial(binary);
+
+		if license.Version < 0 || len(license.ProductCode) == 0 {
+			return nil, errors.New("Incomplete serial number")
+		}
+
+		if license.Version != 1 {
+			return nil, errors.New("Unsupported version")
+		}
+
+		if strings.Compare(license.ProductCode, exported_product_code) != 0 {
+			return nil, errors.New("Invalid product code")
+		}
+
+		return license, err
+	}
 }
