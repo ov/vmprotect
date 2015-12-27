@@ -109,7 +109,7 @@ func decodeSerial(binary string) (string) {
 }
 
 func unpackSerial(binary string) (*License, error) {
-	var license License
+	var license = new (License)
 
 	sn_len := len(binary)
 
@@ -203,7 +203,7 @@ func unpackSerial(binary string) (*License, error) {
 		return nil, errors.New("Serial number CRC error")
 	}
 	
-	return &license, nil
+	return license, nil
 }
 
 func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
