@@ -1,6 +1,7 @@
 package vmprotect
 
 import (
+	"crypto/sha1"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -108,15 +109,113 @@ func decodeSerial(binary string) (string) {
 }
 
 func unpackSerial(binary string) (*License, error) {
-	return nil, errors.New("Not implemented")
+	var license License
+
+	sn_len := len(binary)
+
+	//skip front padding until \0
+	var i int = 1
+	for _, r := range binary[1:] {
+		if int(r) != 0 {
+			i++
+		} else {
+			break
+		}
+	}
+	
+	if i == sn_len {
+		return nil, errors.New("Serial number parsing error (len)")
+	}
+
+	i++
+	var start = i
+	var end int = 0
+	
+	for i := 0; i < len(binary); i++ {
+		ch := binary[i]
+		i++
+
+		if (ch == 1) {
+			license.Version = int(binary[i])
+			i++
+		} else if (ch == 2) {
+			lenght := int(binary[i])
+			i++
+			license.Name = binary[i:lenght]
+			i += lenght
+		} else if (ch == 3) {
+			lenght := int(binary[i])
+			i++
+			license.Email = binary[i:lenght]
+			i += lenght
+		} else if (ch == 4) {
+			lenght := int(binary[i])
+			i++
+			HardwareId, err := base64.StdEncoding.DecodeString(binary[i:lenght])
+			if err != nil {
+				return nil, errors.New("Invalid serial number encoding")
+			}
+			license.HardwareId = HardwareId
+			i += lenght
+		} else if (ch == 5) {
+			license.Expiration = time.Date(int(binary[i + 2]) + int(binary[i + 3]) * 256, time.Month(int(binary[i + 1])), int(binary[i]), 0, 0, 0, 0, time.UTC)
+			i += 4
+		} else if (ch == 6) {
+			license.RunningTimeLimit = int(binary[i])
+			i++
+		} else if (ch == 7) {
+			ProductCode, err := base64.StdEncoding.DecodeString(binary[i:8])
+			if err != nil {
+				return nil, errors.New("Invalid serial number encoding")
+			}
+			license.ProductCode = string(ProductCode)
+			i += 8
+		} else if (ch == 8) {
+			lenght := int(binary[i])
+			i++
+			license.UserData = []byte(binary[i:lenght])
+			i += lenght
+		} else if (ch == 9) {
+			license.MaxBuild = time.Date(int(binary[i + 2]) + int(binary[i + 3]) * 256, time.Month(int(binary[i + 1])), int(binary[i]), 0, 0, 0, 0, time.UTC)
+			i += 4
+		} else if (ch == 255) {
+			end = i - 1;
+		} else {
+			return nil, errors.New("Serial number parsing error (chunk)")
+		}
+	}
+
+	if end == 0 || sn_len - end < 4 {
+		return nil, errors.New("Serial number CRC error")
+	}
+	
+	var hash_arr = sha1.Sum([]byte(binary[start:end - start]))
+	var hash = string(hash_arr[:])
+	
+	var rev_hash string
+	for i := 0; i < 4; i++ {
+		rev_hash = hash[i:1] + rev_hash
+	}
+
+	var hash2 = binary[end + 1: 4]
+	
+	if strings.Compare(rev_hash, hash2) != 0 {
+		return nil, errors.New("Serial number CRC error")
+	}
+	
+	return &license, nil
 }
 
 func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
+	strings.Replace(serial, " ", "", -1)
+	strings.Replace(serial, "\t", "", -1)
+	strings.Replace(serial, "\n", "", -1)
+	strings.Replace(serial, "\r", "", -1)
+	
 	_serial, err := base64.StdEncoding.DecodeString(serial)
 	serial = string(_serial)
 
 	if err != nil {
-		fmt.Printf("Error in ParseLicense, invalid serial number encoding")
 		return nil, errors.New("Invalid serial number encoding")
 	} else if len(serial) < 240 || len(serial) > 260 {
 		return nil, errors.New("Invalid length")
