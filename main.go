@@ -1,6 +1,7 @@
 package vmprotect
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"math/big"
@@ -14,6 +15,14 @@ type License struct {
 	RunningTimeLimit     int
 	UserData             []byte
 }
+
+val exported_algorithm string = "RSA"
+var exported_bits int = 2048
+var exported_public string = "AAEAAQ=="
+var exported_modulus string = "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ==";
+var exported_product_code string = "6rIktGJdjzY="
+
+var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
 
 func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
 	return nil, errors.New("not implemented")
@@ -81,4 +90,20 @@ func powmod(_base string, _exponent string, _modulus string) (string) {
 	}
 
 	return result.String()
+}
+
+func decodeSerial(binary string) (string) {
+	modulus, err := base64.StdEncoding.DecodeString(exported_modulus)
+	if err != nil {
+		fmt.Printf("Error in decodeSerial, can't base64 decode exported_modulus: %v", exported_modulus)
+	}
+
+	public, err := base64.StdEncoding.DecodeString(exported_public)
+	if err != nil {
+		fmt.Printf("Error in decodeSerial, can't base64 decode exported_public: %v", exported_public)
+	}
+
+	binary = base10Encode(binary);
+	binary = powmod(binary, base10Encode(string(public)), base10Encode(string(modulus)));
+	return base10Decode(binary);
 }
