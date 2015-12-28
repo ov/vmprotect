@@ -40,12 +40,7 @@ func base10Encode(str []byte) (string) {
 }
 
 
-func base10Decode(str string) (string) {
-	var data = new(big.Int)
-	if _, succ := data.SetString(str, 10); !succ {
-		fmt.Printf("Error in base10Decode: %v", str)
-	}
-
+func base10Decode(data *big.Int) (string) {
 	var res string
 	for {
 		if data.Cmp(big.NewInt(0)) <= 0 { break }
@@ -57,7 +52,7 @@ func base10Decode(str string) (string) {
 	return res
 }
 
-func powmod(_base string, _exponent string, _modulus string) (string) {
+func powmod(_base string, _exponent string, _modulus string) (*big.Int) {
 	var base = new(big.Int)
 	if _, succ := base.SetString(_base, 10); !succ {
 		fmt.Printf("Error in powmod, can't convert _base: %v", _base)
@@ -96,7 +91,7 @@ func powmod(_base string, _exponent string, _modulus string) (string) {
 		exponent.Div(exponent, big.NewInt(2))
 	}
 
-	return result.String()
+	return result
 }
 
 func decodeSerial(strbin string) (string) {
@@ -110,8 +105,8 @@ func decodeSerial(strbin string) (string) {
 		fmt.Printf("Error in decodeSerial, can't base64 decode exported_public: %v", exported_public)
 	}
 
-	strbin = powmod(base10Encode([]byte(strbin)), base10Encode(public), base10Encode(modulus))
-	return base10Decode(strbin)
+	res := powmod(base10Encode([]byte(strbin)), base10Encode(public), base10Encode(modulus))
+	return base10Decode(res)
 }
 
 func nextPos(strbin string, from int, count int) (int) {
@@ -219,20 +214,43 @@ func unpackSerial(strbin string) (*License, error) {
 		return nil, errors.New("Serial number CRC error")
 	}
 
-	var hash_arr = sha1.Sum([]byte(strbin[start:end - start]))
-	var hash = string(hash_arr[:])
-	
-	var rev_hash string
-	for i := 0; i < 4; i++ {
-		rev_hash = hash[i:1] + rev_hash
+	fmt.Println("START ", start, "END", end)
+
+	str_arr_size := end - start;
+	var sub_strbin string = strbin[start:end]
+	var str_arr = make([]byte, str_arr_size)
+	var str_arr_index int = 0;
+	for i := 0; i < len(sub_strbin); {
+		ch, size := utf8.DecodeRuneInString(sub_strbin[i:])
+		i += nextPos(sub_strbin, i, size)
+
+		str_arr[str_arr_index] = uint8(int32(ch) & 0xff)
+		fmt.Println("SN ", str_arr_index, str_arr[str_arr_index], int32(ch))
+		str_arr_index++
 	}
 
-	var hash2 = strbin[end + 1: 4]
+	var sha1_hash_arr = sha1.Sum(str_arr)
+	for n, r := range sha1_hash_arr{
+		fmt.Println("SHA1 ", n, int(r))
+	}
+
+	var rev_hash_arr = make([]byte, 4)
+	for i := 0; i < 4; i++ {
+		rev_hash_arr[3 - i] = sha1_hash_arr[i]
+		fmt.Println("REV_SHA1 ", int(rev_hash_arr[3 - i]))
+	}
 	
+	var hash_arr = []byte(strbin[end + 1: end + 1 + 4])
+	for _, r := range hash_arr {
+		fmt.Println("HASH_ARR ", int(r))
+	}
+/*
+	fmt.Println("1.", rev_hash, hash2)
 	if strings.Compare(rev_hash, hash2) != 0 {
 		return nil, errors.New("Serial number CRC error")
 	}
-	
+	fmt.Println("2.")
+*/
 	return license, nil
 }
 
@@ -243,14 +261,13 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 	strings.Replace(serial, "\r", "", -1)
 	
 	_serial, err := base64.StdEncoding.DecodeString(serial)
-	serial = string(_serial)
 
 	if err != nil {
 		return nil, errors.New("Invalid serial number encoding")
-	} else if len(serial) < 240 || len(serial) > 260 {
+	} else if len(_serial) < 240 || len(_serial) > 260 {
 		return nil, errors.New("Invalid length")
 	} else {
-		strbin := decodeSerial(serial);
+		strbin := decodeSerial(string(_serial));
 		license, err := unpackSerial(strbin);
 
 		if license.Version < 0 || len(license.ProductCode) == 0 {
@@ -267,4 +284,8 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 
 		return license, err
 	}
+}
+
+func main() {
+	ParseLicense(test_serial, exported_public, exported_modulus, exported_product_code, exported_bits)
 }
