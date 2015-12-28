@@ -24,10 +24,11 @@ type License struct {
 var exported_algorithm string = "RSA"
 var exported_bits int = 2048
 var exported_public string = "AAEAAQ=="
-var exported_modulus string = "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ==";
 var exported_product_code string = "6rIktGJdjzY="
+var exported_modulus string = "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ=="
 
-var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
+//var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
+var test_serial string = "b2HUC5SA0qqHSmJHAJe+pM9Q5sey+iqCqkW3e0cK8R3kSxlGsFrVzVJ/OZ5etJ8DeDHCKBbmismtwd3I9uzJwitfR/NJJ93u/n/5J0RFDAkklyJ+A23mEDtdwP/w/LS97jvFMfXwX0SMBtQ28948iraiu7VeruU9SZcUerlPLtXj4AKoUOzfciWYJ9xDMA+daJOFioMd7zNZ2AW7bz8PB9+X5Vrtg6fg7QPaJuuXBqkQyxKaoBm/YCcVNBST0LpP0upDV/FDAhHXJL6hjvt55RE6vdHt75othC9diQAIxREN8JhrGkZnOGEypwB5wBCGYeD43bc8s+AM3P7AtUlxxg=="
 
 func base10Encode(str []byte) (string) {
 	var result = big.NewInt(0)
@@ -138,9 +139,18 @@ func unpackSerial(strbin string) (*License, error) {
 	var start = i
 	var end int = 0
 
+	fmt.Println("START", start)
+	for i := start; i < len(strbin); i++ {
+		arr := []byte(strbin[i:i+1])
+		fmt.Println("CH", i, int(arr[0]))
+	}
+
 	for i := start; i < len(strbin); {
 		_b := []byte(strbin[i:i+1])
 		ch := int(_b[0])
+
+		fmt.Println("ERROR", start, i, ch);
+
 		i++
 
 		if (ch == 1) {
@@ -193,10 +203,11 @@ func unpackSerial(strbin string) (*License, error) {
 			end = i - 1;
 			break;
 		} else {
+			fmt.Println("ERROR", start, i, ch);
 			return nil, errors.New("Serial number parsing error (chunk)")
 		}
 	}
-
+	
 	if end == 0 || sn_len - end < 4 {
 		return nil, errors.New("Serial number CRC error")
 	}
@@ -231,6 +242,10 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 	} else {
 		strbin := decodeSerial(string(_serial));
 		license, err := unpackSerial(strbin);
+		
+		if err != nil {
+			return nil, err
+		}
 
 		if license.Version < 0 || len(license.ProductCode) == 0 {
 			return nil, errors.New("Incomplete serial number")
@@ -249,13 +264,17 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 }
 
 func main() {
-	license, _ := ParseLicense(test_serial, exported_public, exported_modulus, exported_product_code, exported_bits)
-	fmt.Println("Name", license.Name)
-	fmt.Println("Expiration", license.Expiration)
-	fmt.Println("MaxBuild", license.MaxBuild)
-	fmt.Println("HardwareId", license.HardwareId)
-	fmt.Println("RunningTimeLimit", license.RunningTimeLimit)
-	fmt.Println("UserData", license.UserData)
-	fmt.Println("ProductCode", license.ProductCode)
-	fmt.Println("Version", license.Version)
+	license, err := ParseLicense(test_serial, exported_public, exported_modulus, exported_product_code, exported_bits)
+	if err != nil {
+		fmt.Print(err)
+	} else {
+		fmt.Println("Name", license.Name)
+		fmt.Println("Expiration", license.Expiration)
+		fmt.Println("MaxBuild", license.MaxBuild)
+		fmt.Println("HardwareId", license.HardwareId)
+		fmt.Println("RunningTimeLimit", license.RunningTimeLimit)
+		fmt.Println("UserData", license.UserData)
+		fmt.Println("ProductCode", license.ProductCode)
+		fmt.Println("Version", license.Version)
+	}
 }
