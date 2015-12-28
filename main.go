@@ -1,6 +1,7 @@
 package vmprotect
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"encoding/base64"
 	"errors"
@@ -8,7 +9,6 @@ import (
 	"math/big"
 	"strings"
 	"time"
-	"unicode/utf8"
 )
 
 type License struct {
@@ -41,15 +41,22 @@ func base10Encode(str []byte) (string) {
 
 
 func base10Decode(data *big.Int) (string) {
+	var buffer bytes.Buffer
+
 	var res string
 	for {
 		if data.Cmp(big.NewInt(0)) <= 0 { break }
 		var m = new(big.Int)
 		data.DivMod(data, big.NewInt(256), m)
-		res =  string(m.Uint64()) + res
+		res =  string(m.Uint64() & 0xff) + res
+		
+		var _buffer bytes.Buffer
+		_buffer.WriteByte(uint8(m.Uint64() & 0xff))
+		_buffer.Write(buffer.Bytes())
+		buffer = _buffer
 	}
 
-	return res
+	return buffer.String()
 }
 
 func powmod(_base string, _exponent string, _modulus string) (*big.Int) {
@@ -109,64 +116,54 @@ func decodeSerial(strbin string) (string) {
 	return base10Decode(res)
 }
 
-func nextPos(strbin string, from int, count int) (int) {
-	var size int = 0;
-
-	for i := 0; i < count; i++ {
-		_, _size := utf8.DecodeRuneInString(strbin[from + i:])
-		size += _size
-	}
-
-	return size
-}
-
 func unpackSerial(strbin string) (*License, error) {
 	var license = new (License)
-
+	
 	//skip front padding until \0
-	var i int = 0
-	for n := 0; n < utf8.RuneCountInString(strbin); n++ {
-		ch, _ := utf8.DecodeRuneInString(strbin[n:])
-		if int(ch) != 0 {
+	var i int = 1
+	for _, r := range strbin {
+		if int(r) != 0 {
 			i++
 		} else {
 			break
 		}
 	}
 
-	sn_len := utf8.RuneCountInString(strbin)
+	sn_len := len(strbin)
 	if i == sn_len {
 		return nil, errors.New("Serial number parsing error (len)")
 	}
 
-	i += nextPos(strbin, i, 1)
+	i++
 	var start = i
 	var end int = 0
 
-	for i := start; i < utf8.RuneCountInString(strbin); {
-		ch, size := utf8.DecodeRuneInString(strbin[i:])
-		i += nextPos(strbin, i, size)
+	for i := start; i < len(strbin); {
+		fmt.Println("**", i)
+		_b := []byte(strbin[i:i+1])
+		ch := int(_b[0])
+		i++
 
 		if (ch == 1) {
-			ch, size := utf8.DecodeRuneInString(strbin[i:])
-			license.Version = int(ch)
-			i += nextPos(strbin, i, size)
+			arr := []byte(strbin[i:i+1])
+			license.Version = int(arr[0])
+			i++
 		} else if (ch == 2) {
-			ch, size := utf8.DecodeRuneInString(strbin[i:])
-			lenght := int(ch)
-			i += nextPos(strbin, i, size)
+			arr := []byte(strbin[i:i+1])
+			lenght := int(arr[0])
+			i++
 			license.Name = strbin[i:i + lenght]
 			i += lenght
 		} else if (ch == 3) {
-			ch, size := utf8.DecodeRuneInString(strbin[i:])
-			lenght := int(ch)
-			i += nextPos(strbin, i, size)
+			arr := []byte(strbin[i:i+1])
+			lenght := int(arr[0])
+			i++
 			license.Email = strbin[i:i + lenght]
 			i += lenght
 		} else if (ch == 4) {
-			ch, size := utf8.DecodeRuneInString(strbin[i:])
-			lenght := int(ch)
-			i += nextPos(strbin, i, size)
+			arr := []byte(strbin[i:i+1])
+			lenght := int(arr[0])
+			i++
 			HardwareId, err := base64.StdEncoding.DecodeString(strbin[i:i + lenght])
 			if err != nil {
 				return nil, errors.New("Invalid serial number encoding")
@@ -175,33 +172,24 @@ func unpackSerial(strbin string) (*License, error) {
 			i += lenght
 		} else if (ch == 5) {
 			license.Expiration = time.Date(int(strbin[i + 2]) + int(strbin[i + 3]) * 256, time.Month(int(strbin[i + 1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
-			i += nextPos(strbin, i, 4)
+			i += 4
 		} else if (ch == 6) {
-			license.RunningTimeLimit = int(strbin[i])
-			i += nextPos(strbin, i, 1)
+			arr := []byte(strbin[i:i+1])
+			license.RunningTimeLimit = int(arr[0])
+			i++
 		} else if (ch == 7) {
-			var productCode = make([]byte, 8)
-
-			var rune_size = 0
-			var rune_pos = 0
-			for n, v := range strbin[i:] {
-				if (rune_pos == 8) { break }
-				productCode[rune_pos] = uint8(int32(v)&0xff)
-
-				_, _size := utf8.DecodeRuneInString(strbin[i + n:])
-				rune_size += _size
-				rune_pos++
-			}
-			license.ProductCode = base64.StdEncoding.EncodeToString(productCode)
-			i += rune_size
+			arr := []byte(strbin[i:i+8])
+			license.ProductCode = base64.StdEncoding.EncodeToString(arr )
+			i += 8
 		} else if (ch == 8) {
-			lenght := int(strbin[i])
-			i += nextPos(strbin, i, 1)
+			arr := []byte(strbin[i:i+1])
+			lenght := int(arr[0])
+			i++
 			license.UserData = []byte(strbin[i:lenght])
-			i += nextPos(strbin, i, lenght)
+			i += lenght
 		} else if (ch == 9) {
 			license.MaxBuild = time.Date(int(strbin[i + 2]) + int(strbin[i + 3]) * 256, time.Month(int(strbin[i + 1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
-			i += nextPos(strbin, i, 4)
+			i += 4
 		} else if (ch == 255) {
 			end = i - 1;
 			break;
@@ -216,20 +204,7 @@ func unpackSerial(strbin string) (*License, error) {
 
 	fmt.Println("START ", start, "END", end)
 
-	str_arr_size := end - start;
-	var sub_strbin string = strbin[start:end]
-	var str_arr = make([]byte, str_arr_size)
-	var str_arr_index int = 0;
-	for i := 0; i < len(sub_strbin); {
-		ch, size := utf8.DecodeRuneInString(sub_strbin[i:])
-		i += nextPos(sub_strbin, i, size)
-
-		str_arr[str_arr_index] = uint8(int32(ch) & 0xff)
-		fmt.Println("SN ", str_arr_index, str_arr[str_arr_index], int32(ch))
-		str_arr_index++
-	}
-
-	var sha1_hash_arr = sha1.Sum(str_arr)
+	var sha1_hash_arr = sha1.Sum([]byte(strbin[start:end]))
 	for n, r := range sha1_hash_arr{
 		fmt.Println("SHA1 ", n, int(r))
 	}
