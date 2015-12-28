@@ -139,7 +139,6 @@ func unpackSerial(strbin string) (*License, error) {
 	var end int = 0
 
 	for i := start; i < len(strbin); {
-		fmt.Println("**", i)
 		_b := []byte(strbin[i:i+1])
 		ch := int(_b[0])
 		i++
@@ -202,30 +201,18 @@ func unpackSerial(strbin string) (*License, error) {
 		return nil, errors.New("Serial number CRC error")
 	}
 
-	fmt.Println("START ", start, "END", end)
-
 	var sha1_hash_arr = sha1.Sum([]byte(strbin[start:end]))
-	for n, r := range sha1_hash_arr{
-		fmt.Println("SHA1 ", n, int(r))
-	}
-
 	var rev_hash_arr = make([]byte, 4)
 	for i := 0; i < 4; i++ {
 		rev_hash_arr[3 - i] = sha1_hash_arr[i]
-		fmt.Println("REV_SHA1 ", int(rev_hash_arr[3 - i]))
 	}
 	
 	var hash_arr = []byte(strbin[end + 1: end + 1 + 4])
-	for _, r := range hash_arr {
-		fmt.Println("HASH_ARR ", int(r))
-	}
-/*
-	fmt.Println("1.", rev_hash, hash2)
-	if strings.Compare(rev_hash, hash2) != 0 {
+
+	if bytes.Compare(rev_hash_arr, hash_arr) != 0 {
 		return nil, errors.New("Serial number CRC error")
 	}
-	fmt.Println("2.")
-*/
+
 	return license, nil
 }
 
@@ -262,5 +249,13 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 }
 
 func main() {
-	ParseLicense(test_serial, exported_public, exported_modulus, exported_product_code, exported_bits)
+	license, _ := ParseLicense(test_serial, exported_public, exported_modulus, exported_product_code, exported_bits)
+	fmt.Println("Name", license.Name)
+	fmt.Println("Expiration", license.Expiration)
+	fmt.Println("MaxBuild", license.MaxBuild)
+	fmt.Println("HardwareId", license.HardwareId)
+	fmt.Println("RunningTimeLimit", license.RunningTimeLimit)
+	fmt.Println("UserData", license.UserData)
+	fmt.Println("ProductCode", license.ProductCode)
+	fmt.Println("Version", license.Version)
 }
