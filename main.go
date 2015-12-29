@@ -21,18 +21,6 @@ type License struct {
 	Version              int
 }
 
-var exported_algorithm string = "RSA"
-var exported_bits int = 2048
-var exported_public string = "AAEAAQ=="
-var exported_product_code string = "6rIktGJdjzY="
-var exported_modulus string = "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ=="
-
-//var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
-//var test_serial string = "b2HUC5SA0qqHSmJHAJe+pM9Q5sey+iqCqkW3e0cK8R3kSxlGsFrVzVJ/OZ5etJ8DeDHCKBbmismtwd3I9uzJwitfR/NJJ93u/n/5J0RFDAkklyJ+A23mEDtdwP/w/LS97jvFMfXwX0SMBtQ28948iraiu7VeruU9SZcUerlPLtXj4AKoUOzfciWYJ9xDMA+daJOFioMd7zNZ2AW7bz8PB9+X5Vrtg6fg7QPaJuuXBqkQyxKaoBm/YCcVNBST0LpP0upDV/FDAhHXJL6hjvt55RE6vdHt75othC9diQAIxREN8JhrGkZnOGEypwB5wBCGYeD43bc8s+AM3P7AtUlxxg=="
-//var test_serial string = "tCSbx9HaC2k4m1X+gfJp3W9g8G86yD3NveCZ+a8TIS08giioeH7xWzuKekcuBXcBp46FpwNi/JpCyyAIPbv/O5twD+acrmINsnq10uBbgIAw8UXIc8RrfIfnQUtbvXDyXpky7NF68BcSBuLSrANqeK2fA07BnE07Nit8BclAIknzYpQp/fp7oPOiil3PIwqh+it3Y060UBEMggnf9GIGhfm+vFkgp90eCFaGJA3l/FFXkQ6S76kq4d+32H8Gv2O1FFol17sgOmWEU1t9VTHXHA/7l+H2LssJyMeEHQ70yWekjiznX270t4jML6iYTFzqk4d6nZl4KO4xTJBpd7hX/w=="
-//var test_serial string = "b2HUC5SA0qqHSmJHAJe+pM9Q5sey+iqCqkW3e0cK8R3kSxlGsFrVzVJ/OZ5etJ8DeDHCKBbmismtwd3I9uzJwitfR/NJJ93u/n/5J0RFDAkklyJ+A23mEDtdwP/w/LS97jvFMfXwX0SMBtQ28948iraiu7VeruU9SZcUerlPLtXj4AKoUOzfciWYJ9xDMA+daJOFioMd7zNZ2AW7bz8PB9+X5Vrtg6fg7QPaJuuXBqkQyxKaoBm/YCcVNBST0LpP0upDV/FDAhHXJL6hjvt55RE6vdHt75othC9diQAIxREN8JhrGkZnOGEypwB5wBCGYeD43bc8s+AM3P7AtUlxxg=="
-var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
-
 func base10Encode(str []byte) (string) {
 	var result = big.NewInt(0)
 	for _, r := range str {
@@ -104,18 +92,18 @@ func powmod(_base string, _exponent string, _modulus string) (*big.Int) {
 	return result
 }
 
-func decodeSerial(strbin string) (string) {
-	modulus, err := base64.StdEncoding.DecodeString(exported_modulus)
+func decodeSerial(strbin, public, modulus string) (string) {
+	_modulus, err := base64.StdEncoding.DecodeString(modulus)
 	if err != nil {
-		fmt.Printf("Error in decodeSerial, can't base64 decode exported_modulus: %v", exported_modulus)
+		fmt.Printf("Error in decodeSerial, can't base64 decode modulus: %v", modulus)
 	}
 
-	public, err := base64.StdEncoding.DecodeString(exported_public)
+	_public, err := base64.StdEncoding.DecodeString(public)
 	if err != nil {
-		fmt.Printf("Error in decodeSerial, can't base64 decode exported_public: %v", exported_public)
+		fmt.Printf("Error in decodeSerial, can't base64 decode public: %v", public)
 	}
 
-	res := powmod(base10Encode([]byte(strbin)), base10Encode(public), base10Encode(modulus))
+	res := powmod(base10Encode([]byte(strbin)), base10Encode(_public), base10Encode(_modulus))
 	return base10Decode(res)
 }
 
@@ -231,7 +219,7 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 	} else if len(_serial) < 240 || len(_serial) > 260 {
 		return nil, errors.New("Invalid length")
 	} else {
-		strbin := decodeSerial(string(_serial))
+		strbin := decodeSerial(string(_serial), public, modulus)
 		license, err := unpackSerial(strbin)
 		
 		if err != nil {
@@ -246,7 +234,7 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 			return nil, errors.New("Unsupported version")
 		}
 
-		if strings.Compare(license.ProductCode, exported_product_code) != 0 {
+		if strings.Compare(license.ProductCode, productCode) != 0 {
 			return nil, errors.New("Invalid product code")
 		}
 
@@ -255,7 +243,16 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 }
 
 func main() {
-	license, err := ParseLicense(test_serial, exported_public, exported_modulus, exported_product_code, exported_bits)
+	//algorithm := "RSA"
+	bits := 2048
+	product_code := "6rIktGJdjzY="
+	public := "AAEAAQ=="
+	modulus := "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ=="
+
+	test_serial := "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
+
+
+	license, err := ParseLicense(test_serial, public, modulus, product_code, bits)
 	if err != nil {
 		fmt.Print(err)
 	} else {
