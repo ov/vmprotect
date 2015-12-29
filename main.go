@@ -27,8 +27,11 @@ var exported_public string = "AAEAAQ=="
 var exported_product_code string = "6rIktGJdjzY="
 var exported_modulus string = "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ=="
 
-var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
+//var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
 //var test_serial string = "b2HUC5SA0qqHSmJHAJe+pM9Q5sey+iqCqkW3e0cK8R3kSxlGsFrVzVJ/OZ5etJ8DeDHCKBbmismtwd3I9uzJwitfR/NJJ93u/n/5J0RFDAkklyJ+A23mEDtdwP/w/LS97jvFMfXwX0SMBtQ28948iraiu7VeruU9SZcUerlPLtXj4AKoUOzfciWYJ9xDMA+daJOFioMd7zNZ2AW7bz8PB9+X5Vrtg6fg7QPaJuuXBqkQyxKaoBm/YCcVNBST0LpP0upDV/FDAhHXJL6hjvt55RE6vdHt75othC9diQAIxREN8JhrGkZnOGEypwB5wBCGYeD43bc8s+AM3P7AtUlxxg=="
+//var test_serial string = "tCSbx9HaC2k4m1X+gfJp3W9g8G86yD3NveCZ+a8TIS08giioeH7xWzuKekcuBXcBp46FpwNi/JpCyyAIPbv/O5twD+acrmINsnq10uBbgIAw8UXIc8RrfIfnQUtbvXDyXpky7NF68BcSBuLSrANqeK2fA07BnE07Nit8BclAIknzYpQp/fp7oPOiil3PIwqh+it3Y060UBEMggnf9GIGhfm+vFkgp90eCFaGJA3l/FFXkQ6S76kq4d+32H8Gv2O1FFol17sgOmWEU1t9VTHXHA/7l+H2LssJyMeEHQ70yWekjiznX270t4jML6iYTFzqk4d6nZl4KO4xTJBpd7hX/w=="
+//var test_serial string = "b2HUC5SA0qqHSmJHAJe+pM9Q5sey+iqCqkW3e0cK8R3kSxlGsFrVzVJ/OZ5etJ8DeDHCKBbmismtwd3I9uzJwitfR/NJJ93u/n/5J0RFDAkklyJ+A23mEDtdwP/w/LS97jvFMfXwX0SMBtQ28948iraiu7VeruU9SZcUerlPLtXj4AKoUOzfciWYJ9xDMA+daJOFioMd7zNZ2AW7bz8PB9+X5Vrtg6fg7QPaJuuXBqkQyxKaoBm/YCcVNBST0LpP0upDV/FDAhHXJL6hjvt55RE6vdHt75othC9diQAIxREN8JhrGkZnOGEypwB5wBCGYeD43bc8s+AM3P7AtUlxxg=="
+var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
 
 func base10Encode(str []byte) (string) {
 	var result = big.NewInt(0)
@@ -142,7 +145,7 @@ func unpackSerial(strbin string) (*License, error) {
 		_b := []byte(strbin[i:i+1])
 		ch := int(_b[0])
 		i++
-		
+
 		if (ch == 1) {
 			arr := []byte(strbin[i:i+1])
 			license.Version = int(arr[0])
@@ -163,11 +166,7 @@ func unpackSerial(strbin string) (*License, error) {
 			arr := []byte(strbin[i:i+1])
 			lenght := int(arr[0])
 			i++
-			HardwareId, err := base64.StdEncoding.DecodeString(strbin[i:i + lenght])
-			if err != nil {
-				return nil, errors.New("Invalid serial number encoding")
-			}
-			license.HardwareId = HardwareId
+			license.HardwareId = []byte(base64.StdEncoding.EncodeToString([]byte(strbin[i:i+8])))
 			i += lenght
 		} else if (ch == 5) {
 			license.Expiration = time.Date(int(strbin[i + 2]) + int(strbin[i + 3]) * 256, time.Month(int(strbin[i + 1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
