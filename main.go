@@ -22,7 +22,7 @@ type License struct {
 }
 
 func base10Encode(str []byte) string {
-	var result = big.NewInt(0)
+	var result = new(big.Int)
 	for _, r := range str {
 		result.Mul(result, big.NewInt(256))
 		result.Add(result, big.NewInt(int64(r)))
@@ -67,25 +67,23 @@ func powmod(_base string, _exponent string, _modulus string) *big.Int {
 	}
 
 	var square = new(big.Int)
-	var _square = base
-	_square.DivMod(base, modulus, square)
+	square.Mod(base, modulus)
 	var result = big.NewInt(1)
 
 	for {
 		if exponent.Cmp(big.NewInt(0)) <= 0 { break }
 
 		var _exp = new(big.Int)
-		_exp.Set(exponent)
-		_exp.Mod(_exp, big.NewInt(2))
+		_exp.Mod(exponent, big.NewInt(2))
 
 		if _exp.Cmp(big.NewInt(0)) != 0 {
 			var _result = result
-			var mul_res = _result.Mul(_result, square)
-			_result.DivMod(mul_res, modulus, result)
+			_result.Mul(result, square)
+			result.Mod(_result, modulus)
 		}
 
 		var _square = square
-		_square.DivMod(_square.Mul(_square, _square), modulus, square)
+		square.Mod(_square.Mul(square, square), modulus)
 		exponent.Div(exponent, big.NewInt(2))
 	}
 
