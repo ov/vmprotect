@@ -111,8 +111,7 @@ func unpackSerial(strbin string) (*License, error) {
 	//skip front padding until \0
 	var i int = 1
 	for ; i < len(strbin); i++ {
-		arr := []byte(strbin[i:i+1])
-		if int(arr[0]) == 0 {
+		if int(strbin[i]) == 0 {
 			break
 		}
 	}
@@ -127,48 +126,40 @@ func unpackSerial(strbin string) (*License, error) {
 	var end int = 0
 
 	for i := start; i < len(strbin); {
-		_b := []byte(strbin[i:i+1])
-		ch := int(_b[0])
+		ch := int(strbin[i])
 		i++
 
 		if (ch == 1) {
-			arr := []byte(strbin[i:i+1])
-			license.Version = int(arr[0])
+			license.Version = int(strbin[i])
 			i++
 		} else if (ch == 2) {
-			arr := []byte(strbin[i:i+1])
-			lenght := int(arr[0])
+			lenght := int(strbin[i])
 			i++
 			license.Name = strbin[i:i + lenght]
 			i += lenght
 		} else if (ch == 3) {
-			arr := []byte(strbin[i:i+1])
-			lenght := int(arr[0])
+			lenght := int(strbin[i])
 			i++
 			license.Email = strbin[i:i + lenght]
 			i += lenght
 		} else if (ch == 4) {
-			arr := []byte(strbin[i:i+1])
-			lenght := int(arr[0])
+			lenght := int(strbin[i])
 			i++
-			license.HardwareId = []byte(strbin[i:i+8])
+			license.HardwareId = []byte(strbin[i:i + 8])
 			i += lenght
 		} else if (ch == 5) {
 			license.Expiration = time.Date(int(strbin[i + 2]) + int(strbin[i + 3]) * 256, time.Month(int(strbin[i + 1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
 			i += 4
 		} else if (ch == 6) {
-			arr := []byte(strbin[i:i+1])
-			license.RunningTimeLimit = int(arr[0])
+			license.RunningTimeLimit = int(strbin[i])
 			i++
 		} else if (ch == 7) {
-			arr := []byte(strbin[i:i+8])
-			license.ProductCode = base64.StdEncoding.EncodeToString(arr)
+			license.ProductCode = base64.StdEncoding.EncodeToString([]byte(strbin[i:i + 8]))
 			i += 8
 		} else if (ch == 8) {
-			arr := []byte(strbin[i:i+1])
-			lenght := int(arr[0])
+			lenght := int(strbin[i])
 			i++
-			license.UserData = []byte(strbin[i:i+lenght])
+			license.UserData = []byte(strbin[i:i + lenght])
 			i += lenght
 		} else if (ch == 9) {
 			license.MaxBuild = time.Date(int(strbin[i + 2]) + int(strbin[i + 3]) * 256, time.Month(int(strbin[i + 1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)

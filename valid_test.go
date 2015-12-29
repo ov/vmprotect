@@ -76,8 +76,8 @@ func TestNameEmailAndDates(t *testing.T) {
 		t.Fatal("Max build date must be 25/11/2014")
 	}
 
-	if lic.RunningTimeLimit != 37 {
-		//t.Fatal("Running time limit must be 47")
+	if lic.RunningTimeLimit != 47 {
+		t.Fatal("Running time limit must be 47")
 	}
 
 	if lic.HardwareId != nil {
