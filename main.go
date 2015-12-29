@@ -241,29 +241,3 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 		return license, err
 	}
 }
-
-func main() {
-	//algorithm := "RSA"
-	bits := 2048
-	product_code := "6rIktGJdjzY="
-	public := "AAEAAQ=="
-	modulus := "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ=="
-
-	test_serial := "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
-
-
-	license, err := ParseLicense(test_serial, public, modulus, product_code, bits)
-	if err != nil {
-		fmt.Print(err)
-	} else {
-		fmt.Println("Version", license.Version)
-		fmt.Println("Name", license.Name)
-		fmt.Println("Email", license.Email)
-		fmt.Println("HardwareId", license.HardwareId)
-		fmt.Println("ProductCode", license.ProductCode)
-		fmt.Println("UserData", license.UserData)
-		fmt.Println("Expiration", license.Expiration)
-		fmt.Println("MaxBuild", license.MaxBuild)
-		fmt.Println("RunningTimeLimit", license.RunningTimeLimit)
-	}
-}
