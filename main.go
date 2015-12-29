@@ -21,7 +21,7 @@ type License struct {
 	Version              int
 }
 
-func base10Encode(str []byte) (string) {
+func base10Encode(str []byte) string {
 	var result = big.NewInt(0)
 	for _, r := range str {
 		result.Mul(result, big.NewInt(256))
@@ -31,7 +31,7 @@ func base10Encode(str []byte) (string) {
 	return result.String()
 }
 
-func base10Decode(data *big.Int) (string) {
+func base10Decode(data *big.Int) string {
 	var buffer bytes.Buffer
 
 	var res string
@@ -50,7 +50,7 @@ func base10Decode(data *big.Int) (string) {
 	return buffer.String()
 }
 
-func powmod(_base string, _exponent string, _modulus string) (*big.Int) {
+func powmod(_base string, _exponent string, _modulus string) *big.Int {
 	var base = new(big.Int)
 	if _, succ := base.SetString(_base, 10); !succ {
 		fmt.Printf("Error in powmod, can't convert _base: %v", _base)
@@ -92,7 +92,7 @@ func powmod(_base string, _exponent string, _modulus string) (*big.Int) {
 	return result
 }
 
-func decodeSerial(strbin, public, modulus string) (string) {
+func decodeSerial(strbin, public, modulus string) string {
 	_modulus, err := base64.StdEncoding.DecodeString(modulus)
 	if err != nil {
 		fmt.Printf("Error in decodeSerial, can't base64 decode modulus: %v", modulus)
@@ -203,17 +203,36 @@ func unpackSerial(strbin string) (*License, error) {
 	return license, nil
 }
 
-func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
-	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+func filterSerial(serial string) string {
+	alphabet := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
 	var buffer bytes.Buffer
-	for i := 0; i < len(serial); i++ {
-		ch := serial[i:i+1]
-		if strings.Index(alphabet, ch) != -1 {
-			buffer.WriteString(ch)
+	serial_len := len(serial)
+	for i := 0; i < serial_len; {
+		ch := serial[i]
+		// ASCII
+		if ch < 0x80 {
+			if  bytes.IndexByte(alphabet, ch) != -1 {
+				buffer.WriteByte(ch)
+			}
+
+			i++
+		//UNICODE
+		} else if ch < 0xC0 {
+			i++
+		} else if ch < 0xE0 {
+			i += 2
+		} else if ch < 0xF0 {
+			i += 3
+		} else if ch < 0xF8 {
+			i += 4
 		}
 	}
 	
-	_serial, err := base64.StdEncoding.DecodeString(buffer.String())
+	return buffer.String()
+}
+
+func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
+	_serial, err := base64.StdEncoding.DecodeString(filterSerial(serial))
 	if err != nil {
 		return nil, errors.New("Invalid serial number encoding")
 	} else if len(_serial) < 240 || len(_serial) > 260 {
