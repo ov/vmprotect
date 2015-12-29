@@ -27,8 +27,8 @@ var exported_public string = "AAEAAQ=="
 var exported_product_code string = "6rIktGJdjzY="
 var exported_modulus string = "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ=="
 
-//var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
-var test_serial string = "b2HUC5SA0qqHSmJHAJe+pM9Q5sey+iqCqkW3e0cK8R3kSxlGsFrVzVJ/OZ5etJ8DeDHCKBbmismtwd3I9uzJwitfR/NJJ93u/n/5J0RFDAkklyJ+A23mEDtdwP/w/LS97jvFMfXwX0SMBtQ28948iraiu7VeruU9SZcUerlPLtXj4AKoUOzfciWYJ9xDMA+daJOFioMd7zNZ2AW7bz8PB9+X5Vrtg6fg7QPaJuuXBqkQyxKaoBm/YCcVNBST0LpP0upDV/FDAhHXJL6hjvt55RE6vdHt75othC9diQAIxREN8JhrGkZnOGEypwB5wBCGYeD43bc8s+AM3P7AtUlxxg=="
+var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2KkdKLwy+EcfqtCc1dqK8kfU0+VkAUgH+eKRYNBb/VJQ8igOVQxFqpgwXp0gXz3zE6mjropXfekVPZq+oP4YXg/0UfS1WrLXFoWASTbmqu8+WSWVNQgATgIZx/tONFwRXPXRQlRarTtLo8kl1w4qkKXWn7IYIEeakhpEI2W9Dd1lLZ25i8AfBMtoXe3/BJamtPgfEhpnN4YleXTd7uR6Ny34L+J6RKBf2r6l5/Dmgf4jEHosesS65EUa19ftgd8bW7Aj4Cu5cHdWO0C1kFtq2qKALurF4Qd01gHA=="
+//var test_serial string = "b2HUC5SA0qqHSmJHAJe+pM9Q5sey+iqCqkW3e0cK8R3kSxlGsFrVzVJ/OZ5etJ8DeDHCKBbmismtwd3I9uzJwitfR/NJJ93u/n/5J0RFDAkklyJ+A23mEDtdwP/w/LS97jvFMfXwX0SMBtQ28948iraiu7VeruU9SZcUerlPLtXj4AKoUOzfciWYJ9xDMA+daJOFioMd7zNZ2AW7bz8PB9+X5Vrtg6fg7QPaJuuXBqkQyxKaoBm/YCcVNBST0LpP0upDV/FDAhHXJL6hjvt55RE6vdHt75othC9diQAIxREN8JhrGkZnOGEypwB5wBCGYeD43bc8s+AM3P7AtUlxxg=="
 
 func base10Encode(str []byte) (string) {
 	var result = big.NewInt(0)
@@ -119,13 +119,12 @@ func decodeSerial(strbin string) (string) {
 
 func unpackSerial(strbin string) (*License, error) {
 	var license = new (License)
-	
+
 	//skip front padding until \0
 	var i int = 1
-	for _, r := range strbin {
-		if int(r) != 0 {
-			i++
-		} else {
+	for ; i < len(strbin); i++ {
+		arr := []byte(strbin[i:i+1])
+		if int(arr[0]) == 0 {
 			break
 		}
 	}
@@ -139,20 +138,11 @@ func unpackSerial(strbin string) (*License, error) {
 	var start = i
 	var end int = 0
 
-	fmt.Println("START", start)
-	for i := start; i < len(strbin); i++ {
-		arr := []byte(strbin[i:i+1])
-		fmt.Println("CH", i, int(arr[0]))
-	}
-
 	for i := start; i < len(strbin); {
 		_b := []byte(strbin[i:i+1])
 		ch := int(_b[0])
-
-		fmt.Println("ERROR", start, i, ch);
-
 		i++
-
+		
 		if (ch == 1) {
 			arr := []byte(strbin[i:i+1])
 			license.Version = int(arr[0])
@@ -188,13 +178,13 @@ func unpackSerial(strbin string) (*License, error) {
 			i++
 		} else if (ch == 7) {
 			arr := []byte(strbin[i:i+8])
-			license.ProductCode = base64.StdEncoding.EncodeToString(arr )
+			license.ProductCode = base64.StdEncoding.EncodeToString(arr)
 			i += 8
 		} else if (ch == 8) {
 			arr := []byte(strbin[i:i+1])
 			lenght := int(arr[0])
 			i++
-			license.UserData = []byte(strbin[i:lenght])
+			license.UserData = []byte(strbin[i:i+lenght])
 			i += lenght
 		} else if (ch == 9) {
 			license.MaxBuild = time.Date(int(strbin[i + 2]) + int(strbin[i + 3]) * 256, time.Month(int(strbin[i + 1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
@@ -268,13 +258,14 @@ func main() {
 	if err != nil {
 		fmt.Print(err)
 	} else {
+		fmt.Println("Version", license.Version)
 		fmt.Println("Name", license.Name)
+		fmt.Println("Email", license.Email)
+		fmt.Println("HardwareId", license.HardwareId)
+		fmt.Println("ProductCode", license.ProductCode)
+		fmt.Println("UserData", license.UserData)
 		fmt.Println("Expiration", license.Expiration)
 		fmt.Println("MaxBuild", license.MaxBuild)
-		fmt.Println("HardwareId", license.HardwareId)
 		fmt.Println("RunningTimeLimit", license.RunningTimeLimit)
-		fmt.Println("UserData", license.UserData)
-		fmt.Println("ProductCode", license.ProductCode)
-		fmt.Println("Version", license.Version)
 	}
 }
