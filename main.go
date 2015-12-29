@@ -35,14 +35,13 @@ var test_serial string = "q6nn/37sjamWyZTsQPFsmHDkKf7tsDApRPO6Yv/D4bUdxs45qd2Kkd
 
 func base10Encode(str []byte) (string) {
 	var result = big.NewInt(0)
-    for _, r := range str {
+	for _, r := range str {
 		result.Mul(result, big.NewInt(256))
 		result.Add(result, big.NewInt(int64(r)))
-    }
+	}
 
 	return result.String()
 }
-
 
 func base10Decode(data *big.Int) (string) {
 	var buffer bytes.Buffer
@@ -53,7 +52,7 @@ func base10Decode(data *big.Int) (string) {
 		var m = new(big.Int)
 		data.DivMod(data, big.NewInt(256), m)
 		res =  string(m.Uint64() & 0xff) + res
-		
+
 		var _buffer bytes.Buffer
 		_buffer.WriteByte(uint8(m.Uint64() & 0xff))
 		_buffer.Write(buffer.Bytes())
@@ -166,7 +165,7 @@ func unpackSerial(strbin string) (*License, error) {
 			arr := []byte(strbin[i:i+1])
 			lenght := int(arr[0])
 			i++
-			license.HardwareId = []byte(base64.StdEncoding.EncodeToString([]byte(strbin[i:i+8])))
+			license.HardwareId = []byte(strbin[i:i+8])
 			i += lenght
 		} else if (ch == 5) {
 			license.Expiration = time.Date(int(strbin[i + 2]) + int(strbin[i + 3]) * 256, time.Month(int(strbin[i + 1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
@@ -189,14 +188,14 @@ func unpackSerial(strbin string) (*License, error) {
 			license.MaxBuild = time.Date(int(strbin[i + 2]) + int(strbin[i + 3]) * 256, time.Month(int(strbin[i + 1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
 			i += 4
 		} else if (ch == 255) {
-			end = i - 1;
-			break;
+			end = i - 1
+			break
 		} else {
 			fmt.Println("ERROR", start, i, ch);
 			return nil, errors.New("Serial number parsing error (chunk)")
 		}
 	}
-	
+
 	if end == 0 || sn_len - end < 4 {
 		return nil, errors.New("Serial number CRC error")
 	}
@@ -206,7 +205,7 @@ func unpackSerial(strbin string) (*License, error) {
 	for i := 0; i < 4; i++ {
 		rev_hash_arr[3 - i] = sha1_hash_arr[i]
 	}
-	
+
 	var hash_arr = []byte(strbin[end + 1: end + 1 + 4])
 
 	if bytes.Compare(rev_hash_arr, hash_arr) != 0 {
@@ -217,20 +216,23 @@ func unpackSerial(strbin string) (*License, error) {
 }
 
 func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
-	strings.Replace(serial, " ", "", -1)
-	strings.Replace(serial, "\t", "", -1)
-	strings.Replace(serial, "\n", "", -1)
-	strings.Replace(serial, "\r", "", -1)
+	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+	filtered_serial := ""
+	for _, c := range serial {
+		s := string(c)
+		if strings.Index(alphabet, s) != -1 {
+			filtered_serial += s
+		}
+	}
 	
-	_serial, err := base64.StdEncoding.DecodeString(serial)
-
+	_serial, err := base64.StdEncoding.DecodeString(filtered_serial)
 	if err != nil {
 		return nil, errors.New("Invalid serial number encoding")
 	} else if len(_serial) < 240 || len(_serial) > 260 {
 		return nil, errors.New("Invalid length")
 	} else {
-		strbin := decodeSerial(string(_serial));
-		license, err := unpackSerial(strbin);
+		strbin := decodeSerial(string(_serial))
+		license, err := unpackSerial(strbin)
 		
 		if err != nil {
 			return nil, err
