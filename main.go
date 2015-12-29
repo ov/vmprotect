@@ -205,15 +205,15 @@ func unpackSerial(strbin string) (*License, error) {
 
 func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
 	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
-	filtered_serial := ""
-	for _, c := range serial {
-		s := string(c)
-		if strings.Index(alphabet, s) != -1 {
-			filtered_serial += s
+	var buffer bytes.Buffer
+	for i := 0; i < len(serial); i++ {
+		ch := serial[i:i+1]
+		if strings.Index(alphabet, ch) != -1 {
+			buffer.WriteString(ch)
 		}
 	}
 	
-	_serial, err := base64.StdEncoding.DecodeString(filtered_serial)
+	_serial, err := base64.StdEncoding.DecodeString(buffer.String())
 	if err != nil {
 		return nil, errors.New("Invalid serial number encoding")
 	} else if len(_serial) < 240 || len(_serial) > 260 {
