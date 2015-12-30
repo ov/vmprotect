@@ -221,10 +221,12 @@ func filterSerial(serial string) string {
 }
 
 func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
+	bytes_len := bits / 8;
+
 	_serial, err := base64.StdEncoding.DecodeString(filterSerial(serial))
 	if err != nil {
 		return nil, errors.New("Invalid serial number encoding")
-	} else if len(_serial) < 240 || len(_serial) > 260 {
+	} else if len(_serial) < (bytes_len - 6) || len(_serial) >  (bytes_len + 6) {
 		return nil, errors.New("Invalid length")
 	} else {
 		strbin := decodeSerial(string(_serial), public, modulus)
