@@ -43,3 +43,14 @@ func TestIgnoreUnsupportedCharacters(t *testing.T) {
 		t.Fatal("The input has some unsupported characters that must be ignored. The input must be valid, but the serial number itself - doesn't")
 	}
 }
+
+func TestVmpParamsNotInitialized(t *testing.T) {
+	serial := "b2HUC5SA0qqHSmJHAJe+pM9Q5sey+iqCqkW3e0cK8R3kSxlGsFrVzVJ/OZ5etJ8DeDHCKBbmismtwd3I9uzJwitfR/NJJ93u/n/5J0RFDAkklyJ+A23mEDtdwP/w/LS97jvFMfXwX0SMBtQ28948iraiu7VeruU9SZcUerlPLtXj4AKoUOzfciWYJ9xDMA+daJOFioMd7zNZ2AW7bz8PB9+X5Vrtg6fg7QPaJuuXBqkQyxKaoBm/YCcVNBST0LpP0upDV/FDAhHXJL6hjvt55RE6vdHt75othC9diQAIxREN8JhrGkZnOGEypwB5wBCGYeD43bc8s+AM3P7AtUlxxg=="
+	lic, err := ParseLicense(serial, "", "", "", 2048)
+	if err == nil {
+		t.Fatal("There must be an error here")
+	}
+	if lic != nil {
+		t.Fatal("License must not be returned")
+	}
+}
