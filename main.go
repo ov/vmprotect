@@ -186,8 +186,7 @@ func unpackSerial(strbin string) (*License, error) {
 			end = i - 1
 			break
 		} else {
-			fmt.Println("ERROR", start, i, ch)
-			return nil, errors.New("Serial number parsing error (chunk)")
+			return nil, errors.New(fmt.Sprintf("Serial number parsing error (chunk): %d %d %d", start, i, ch))
 		}
 	}
 
