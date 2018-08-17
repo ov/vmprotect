@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -36,10 +37,12 @@ func base10Decode(data *big.Int) string {
 
 	var res string
 	for {
-		if data.Cmp(big.NewInt(0)) <= 0 { break }
+		if data.Cmp(big.NewInt(0)) <= 0 {
+			break
+		}
 		var m = new(big.Int)
 		data.DivMod(data, big.NewInt(256), m)
-		res =  string(m.Uint64() & 0xff) + res
+		res = string(m.Uint64()&0xff) + res
 
 		var _buffer bytes.Buffer
 		_buffer.WriteByte(uint8(m.Uint64() & 0xff))
@@ -71,7 +74,9 @@ func powmod(_base string, _exponent string, _modulus string) *big.Int {
 	var result = big.NewInt(1)
 
 	for {
-		if exponent.Cmp(big.NewInt(0)) <= 0 { break }
+		if exponent.Cmp(big.NewInt(0)) <= 0 {
+			break
+		}
 
 		var _exp = new(big.Int)
 		_exp.Mod(exponent, big.NewInt(2))
@@ -106,7 +111,7 @@ func decodeSerial(strbin, public, modulus string) string {
 }
 
 func unpackSerial(strbin string) (*License, error) {
-	var license = new (License)
+	var license = new(License)
 
 	//skip front padding until \0
 	var i int = 1
@@ -129,61 +134,61 @@ func unpackSerial(strbin string) (*License, error) {
 		ch := int(strbin[i])
 		i++
 
-		if (ch == 1) {
+		if ch == 1 {
 			license.Version = int(strbin[i])
 			i++
-		} else if (ch == 2) {
+		} else if ch == 2 {
 			lenght := int(strbin[i])
 			i++
-			license.Name = strbin[i:i + lenght]
+			license.Name = strbin[i : i+lenght]
 			i += lenght
-		} else if (ch == 3) {
+		} else if ch == 3 {
 			lenght := int(strbin[i])
 			i++
-			license.Email = strbin[i:i + lenght]
+			license.Email = strbin[i : i+lenght]
 			i += lenght
-		} else if (ch == 4) {
+		} else if ch == 4 {
 			lenght := int(strbin[i])
 			i++
-			license.HardwareId = []byte(strbin[i:i + 8])
+			license.HardwareId = []byte(strbin[i : i+8])
 			i += lenght
-		} else if (ch == 5) {
-			license.Expiration = time.Date(int(strbin[i + 2]) + int(strbin[i + 3]) * 256, time.Month(int(strbin[i + 1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
+		} else if ch == 5 {
+			license.Expiration = time.Date(int(strbin[i+2])+int(strbin[i+3])*256, time.Month(int(strbin[i+1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
 			i += 4
-		} else if (ch == 6) {
+		} else if ch == 6 {
 			license.RunningTimeLimit = int(strbin[i])
 			i++
-		} else if (ch == 7) {
-			license.ProductCode = base64.StdEncoding.EncodeToString([]byte(strbin[i:i + 8]))
+		} else if ch == 7 {
+			license.ProductCode = base64.StdEncoding.EncodeToString([]byte(strbin[i : i+8]))
 			i += 8
-		} else if (ch == 8) {
+		} else if ch == 8 {
 			lenght := int(strbin[i])
 			i++
-			license.UserData = []byte(strbin[i:i + lenght])
+			license.UserData = []byte(strbin[i : i+lenght])
 			i += lenght
-		} else if (ch == 9) {
-			license.MaxBuild = time.Date(int(strbin[i + 2]) + int(strbin[i + 3]) * 256, time.Month(int(strbin[i + 1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
+		} else if ch == 9 {
+			license.MaxBuild = time.Date(int(strbin[i+2])+int(strbin[i+3])*256, time.Month(int(strbin[i+1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
 			i += 4
-		} else if (ch == 255) {
+		} else if ch == 255 {
 			end = i - 1
 			break
 		} else {
-			fmt.Println("ERROR", start, i, ch);
+			fmt.Println("ERROR", start, i, ch)
 			return nil, errors.New("Serial number parsing error (chunk)")
 		}
 	}
 
-	if end == 0 || sn_len - end < 4 {
+	if end == 0 || sn_len-end < 4 {
 		return nil, errors.New("Serial number CRC error")
 	}
 
 	var sha1_hash_arr = sha1.Sum([]byte(strbin[start:end]))
 	var rev_hash_arr = make([]byte, 4)
 	for i := 0; i < 4; i++ {
-		rev_hash_arr[3 - i] = sha1_hash_arr[i]
+		rev_hash_arr[3-i] = sha1_hash_arr[i]
 	}
 
-	var hash_arr = []byte(strbin[end + 1: end + 1 + 4])
+	var hash_arr = []byte(strbin[end+1 : end+1+4])
 
 	if bytes.Compare(rev_hash_arr, hash_arr) != 0 {
 		return nil, errors.New("Serial number CRC error")
@@ -200,12 +205,12 @@ func filterSerial(serial string) string {
 		ch := serial[i]
 		// ASCII
 		if ch < 0x80 {
-			if  bytes.IndexByte(alphabet, ch) != -1 {
+			if bytes.IndexByte(alphabet, ch) != -1 {
 				buffer.WriteByte(ch)
 			}
 
 			i++
-		//UNICODE
+			//UNICODE
 		} else if ch < 0xC0 {
 			i++
 		} else if ch < 0xE0 {
@@ -216,22 +221,22 @@ func filterSerial(serial string) string {
 			i += 4
 		}
 	}
-	
+
 	return buffer.String()
 }
 
 func ParseLicense(serial, public, modulus, productCode string, bits int) (*License, error) {
-	bytes_len := bits / 8;
+	bytes_len := bits / 8
 
 	_serial, err := base64.StdEncoding.DecodeString(filterSerial(serial))
 	if err != nil {
 		return nil, errors.New("Invalid serial number encoding")
-	} else if len(_serial) < (bytes_len - 6) || len(_serial) >  (bytes_len + 6) {
+	} else if len(_serial) < (bytes_len-6) || len(_serial) > (bytes_len+6) {
 		return nil, errors.New("Invalid length")
 	} else {
 		strbin := decodeSerial(string(_serial), public, modulus)
 		license, err := unpackSerial(strbin)
-		
+
 		if err != nil {
 			return nil, err
 		}
@@ -250,4 +255,152 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 
 		return license, err
 	}
+}
+
+func packSerial(l *License, bits int) ([]byte, error) {
+	if l.Version != 1 {
+		return []byte{}, errors.New("Unsupported version")
+	}
+
+	serial := make([]byte, 0)
+	serial = append(serial, 1, 1)
+
+	if l.Name != "" {
+		nameLen := len(l.Name)
+		if nameLen > 255 {
+			return []byte{}, errors.New("User name is too long")
+		}
+
+		serial = append(serial, 2)
+		serial = append(serial, byte(nameLen))
+		for i := 0; i < nameLen; i++ {
+			serial = append(serial, l.Name[i])
+		}
+	}
+
+	if l.Email != "" {
+		emailLen := len(l.Email)
+		if emailLen > 255 {
+			return []byte{}, errors.New("E-Mail is too long")
+		}
+
+		serial = append(serial, 3)
+		serial = append(serial, byte(emailLen))
+		for i := 0; i < emailLen; i++ {
+			serial = append(serial, l.Email[i])
+		}
+	}
+
+	if !l.Expiration.IsZero() {
+		serial = append(serial, 5)
+		serial = append(serial, byte(l.Expiration.Day()))
+		serial = append(serial, byte(l.Expiration.Month()))
+		serial = append(serial, byte(l.Expiration.Year()%256))
+		serial = append(serial, byte(l.Expiration.Year()/256))
+	}
+
+	if l.RunningTimeLimit > 0 {
+		serial = append(serial, 6)
+		serial = append(serial, byte(l.RunningTimeLimit))
+	}
+
+	if l.ProductCode != "" {
+		productCode, err := base64.StdEncoding.DecodeString(l.ProductCode)
+		if err != nil {
+			return []byte{}, fmt.Errorf("Invalid ProductCode decoding: %q", err)
+		}
+
+		serial = append(serial, 7)
+		for i := 0; i < 8; i++ {
+			serial = append(serial, productCode[i])
+		}
+	}
+
+	if len(l.UserData) > 0 {
+		userDataLen := len(l.UserData)
+		if len(l.UserData) > 255 {
+			return []byte{}, errors.New("User data is too long")
+		}
+
+		serial = append(serial, 8)
+		serial = append(serial, byte(userDataLen))
+		for i := 0; i < userDataLen; i++ {
+			serial = append(serial, l.UserData[i])
+		}
+	}
+
+	if !l.MaxBuild.IsZero() {
+		serial = append(serial, 9)
+		serial = append(serial, byte(l.MaxBuild.Day()))
+		serial = append(serial, byte(l.MaxBuild.Month()))
+		serial = append(serial, byte(l.MaxBuild.Year()%256))
+		serial = append(serial, byte(l.MaxBuild.Year()/256))
+	}
+
+	serial = append(serial, 255)
+
+	var sha1HashArr = sha1.Sum(serial)
+	for i := 0; i < 4; i++ {
+		serial = append(serial, sha1HashArr[3-i])
+	}
+
+	paddingFront := []byte{0, 2}
+	randSize := 8 + rand.Intn(9) // from 8 to 16 inclusive
+	for i := 0; i < randSize; i++ {
+		paddingFront = append(paddingFront, byte(1+rand.Intn(256)))
+	}
+	paddingFront = append(paddingFront, 0)
+
+	contentSize := len(serial) + len(paddingFront)
+	rest := bits/8 - contentSize
+	if rest < 0 {
+		return []byte{}, fmt.Errorf("Content is too big to fit in key: %d, maximal allowed is: %d", contentSize, bits/8)
+	}
+
+	paddingBack := make([]byte, 0)
+	for i := 0; i < rest; i++ {
+		paddingBack = append(paddingFront, byte(rand.Intn(256)))
+	}
+
+	paddingFront = append(paddingFront, serial...)
+	serial = append(paddingFront, paddingBack...)
+
+	return serial, nil
+}
+
+/*
+	MakeLicense ...
+*/
+func MakeLicense(l *License, private, modulus string, bits int) (string, error) {
+	//	_bits := 2048
+	//	_private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
+	//	_modulus := "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ=="
+	// productCode := "6rIktGJdjzY="
+
+	packedSerial, err := packSerial(l, bits)
+	if err != nil {
+		return "", err
+	}
+
+	_modulus, err := base64.StdEncoding.DecodeString(modulus)
+	if err != nil {
+		return "", errors.New("Invalid modulus")
+	}
+
+	_private, err := base64.StdEncoding.DecodeString(private)
+	if err != nil {
+		return "", errors.New("Invalid private key")
+	}
+
+	//	_modulus = base10Encode(base64Decode(modulus))
+	//	_private = base10Encode(base64Decode(private))
+	modulus = base10Encode(_private)
+	private = base10Encode(_modulus)
+	strPackedSerial := base10Encode(packedSerial)
+
+	res := powmod(strPackedSerial, private, modulus)
+	_res := base10Decode(res)
+	strPackedSerial = base64.StdEncoding.EncodeToString([]byte(_res))
+
+	return strPackedSerial, nil
 }
