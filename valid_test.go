@@ -164,3 +164,64 @@ func TestNameEmailAndWhitespacesAndUnsupportedCharacters(t *testing.T) {
 		t.Fatal("Hardware ID must be empty")
 	}
 }
+
+func TestMakeLicense(t *testing.T) {
+	private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
+
+	l := new(License)
+	l.Name = "John Doe"
+	l.Email = "john@doe.com"
+	l.Expiration = time.Date(2015, 12, 24, 0, 0, 0, 0, time.UTC)
+	l.MaxBuild = time.Date(2014, 11, 25, 0, 0, 0, 0, time.UTC)
+	l.RunningTimeLimit = 47
+	l.HardwareId = []byte{'0', '0', '1', '1', '2', '2', '3', '3'}
+	l.ProductCode = vmpProductCode
+	l.UserData = []byte("Test User Data")
+	l.Version = 1
+
+	serial, err := MakeLicense(l, private, vmpModulus, vmpBits)
+	if err != nil {
+		t.Fatal("The serial number is valid, it should be parsed well")
+	}
+
+	lic, err := ParseLicense(serial, vmpPublic, vmpModulus, vmpProductCode, vmpBits)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if lic.Name != "John Doe" {
+		t.Fatal("Invalid name")
+	}
+
+	if lic.Email != "john@doe.com" {
+		t.Fatal("Invalid email")
+	}
+
+	if lic.Expiration.IsZero() {
+		t.Fatal("Expiration date must not be zero")
+	}
+
+	if lic.MaxBuild.IsZero() {
+		t.Fatal("Max build date must not be zero")
+	}
+
+	if lic.RunningTimeLimit != 47 {
+		t.Fatal("Running time limit must be 47")
+	}
+
+	if !compareByteSlice(lic.HardwareId, []byte{'0', '0', '1', '1', '2', '2', '3', '3'}) {
+		t.Fatal("Hardware ID must be defined")
+	}
+
+	if lic.ProductCode != vmpProductCode {
+		t.Fatal("Wrong pruduct code")
+	}
+
+	if lic.UserData == nil {
+		t.Fatal("User data must not be nil")
+	}
+
+	if lic.Version != 1 {
+		t.Fatal("Version must be 1")
+	}
+}

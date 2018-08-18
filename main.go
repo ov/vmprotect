@@ -291,6 +291,15 @@ func packSerial(l *License, bits int) ([]byte, error) {
 		}
 	}
 
+	if len(l.HardwareId) > 0 {
+		serial = append(serial, 4)
+		hdwIDLen := len(l.HardwareId)
+		serial = append(serial, byte(hdwIDLen))
+		for i := 0; i < hdwIDLen; i++ {
+			serial = append(serial, l.HardwareId[i])
+		}
+	}
+
 	if !l.Expiration.IsZero() {
 		serial = append(serial, 5)
 		serial = append(serial, byte(l.Expiration.Day()))
@@ -337,9 +346,8 @@ func packSerial(l *License, bits int) ([]byte, error) {
 		serial = append(serial, byte(l.MaxBuild.Year()/256))
 	}
 
-	serial = append(serial, 255)
-
 	var sha1HashArr = sha1.Sum(serial)
+	serial = append(serial, 255)
 	for i := 0; i < 4; i++ {
 		serial = append(serial, sha1HashArr[3-i])
 	}
@@ -368,39 +376,33 @@ func packSerial(l *License, bits int) ([]byte, error) {
 	return serial, nil
 }
 
-/*
-	MakeLicense ...
-*/
 func MakeLicense(l *License, private, modulus string, bits int) (string, error) {
-	//	_bits := 2048
-	//	_private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
-	//	_modulus := "7bJGXCsZBcavBdC3EC+vumdwd2NxzOSjnJvR4pkK1X2gdDCw3b2xOEHDWHiWyD4Y7fiUP31ka3EUiFN7hjd/xuIxADUPL9dVp/9Bfroe7jD6uyI4cy9/wrj75rHVmSPQpCUqDTEfLOU5WqCa9ZH/bU2UD5T9yCIergRAtplD1VvtnkeICpT8FeJfXEQdFWCU8Txv61t41ES+ozxafcTmR1UgC6J+g4si+fspehMmBZA8OFtKtjJd1r5Fr1DIuiplIQRaXhEpsDs095q7ArtMmP2AmS3TP5xgf3Qe/QdHSe4WJz8enbjfCr7FZlEjTrS7/mJwZ6ICAjXeS1KaYAM4GQ=="
-	// productCode := "6rIktGJdjzY="
-
 	packedSerial, err := packSerial(l, bits)
 	if err != nil {
 		return "", err
 	}
 
-	_modulus, err := base64.StdEncoding.DecodeString(modulus)
-	if err != nil {
-		return "", errors.New("Invalid modulus")
-	}
+	/*
+		_modulus, err := base64.StdEncoding.DecodeString(modulus)
+		if err != nil {
+			return "", errors.New("Invalid modulus")
+		}
 
-	_private, err := base64.StdEncoding.DecodeString(private)
-	if err != nil {
-		return "", errors.New("Invalid private key")
-	}
+		_private, err := base64.StdEncoding.DecodeString(private)
+		if err != nil {
+			return "", errors.New("Invalid private key")
+		}
 
-	//	_modulus = base10Encode(base64Decode(modulus))
-	//	_private = base10Encode(base64Decode(private))
-	modulus = base10Encode(_private)
-	private = base10Encode(_modulus)
-	strPackedSerial := base10Encode(packedSerial)
+		modulus = base10Encode(_modulus)
+		private = base10Encode(_private)
+		strPackedSerial := base10Encode(packedSerial)
 
-	res := powmod(strPackedSerial, private, modulus)
-	_res := base10Decode(res)
-	strPackedSerial = base64.StdEncoding.EncodeToString([]byte(_res))
+		res := powmod(strPackedSerial, private, modulus)
+		strRes := base10Decode(res)
+	*/
+
+	strRes := decodeSerial(string(packedSerial), private, modulus)
+	strPackedSerial := base64.StdEncoding.EncodeToString([]byte(strRes))
 
 	return strPackedSerial, nil
 }
