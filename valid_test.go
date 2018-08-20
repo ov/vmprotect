@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestNameEmailAndUserData(t *testing.T) {
@@ -189,41 +191,15 @@ func TestMakeLicense(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if lic.Name != l.Name {
-		t.Fatal("Invalid name")
-	}
-
-	if lic.Email != l.Email {
-		t.Fatal("Invalid email")
-	}
-
-	if lic.Expiration.IsZero() {
-		t.Fatal("Expiration date must not be zero")
-	}
-
-	if lic.MaxBuild.IsZero() {
-		t.Fatal("Max build date must not be zero")
-	}
-
-	if lic.RunningTimeLimit != 47 {
-		t.Fatal("Running time limit must be 47")
-	}
-
-	if !compareByteSlice(lic.HardwareId, l.HardwareId) {
-		t.Fatal("Hardware ID must be defined")
-	}
-
-	if lic.ProductCode != vmpProductCode {
-		t.Fatal("Wrong pruduct code")
-	}
-
-	if lic.UserData == nil {
-		t.Fatal("User data must not be nil")
-	}
-
-	if lic.Version != 1 {
-		t.Fatal("Version must be 1")
-	}
+	require.Equal(t, lic.Name, l.Name, "Invalid name")
+	require.Equal(t, lic.Email, l.Email, "Invalid email")
+	require.NotZero(t, lic.Expiration, "Expiration date must not be zero")
+	require.NotZero(t, lic.MaxBuild, "Max build date must not be zero")
+	require.Equal(t, lic.RunningTimeLimit, l.RunningTimeLimit, "Running time limit must be 47")
+	require.Equal(t, lic.HardwareId, l.HardwareId, "Hardware ID must be defined")
+	require.Equal(t, lic.ProductCode, vmpProductCode, "Wrong pruduct code")
+	require.NotNil(t, lic.UserData, "User data must not be nil")
+	require.Equal(t, lic.Version, l.Version, "Version must be 1")
 }
 func TestMakeLicenseLongName(t *testing.T) {
 	private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
@@ -248,41 +224,15 @@ func TestMakeLicenseLongName(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if lic.Name != l.Name {
-		t.Fatal("Invalid name")
-	}
-
-	if lic.Email != l.Email {
-		t.Fatal("Invalid email")
-	}
-
-	if lic.Expiration.IsZero() {
-		t.Fatal("Expiration date must not be zero")
-	}
-
-	if lic.MaxBuild.IsZero() {
-		t.Fatal("Max build date must not be zero")
-	}
-
-	if lic.RunningTimeLimit != 47 {
-		t.Fatal("Running time limit must be 47")
-	}
-
-	if !compareByteSlice(lic.HardwareId, l.HardwareId) {
-		t.Fatal("Hardware ID must be defined")
-	}
-
-	if lic.ProductCode != vmpProductCode {
-		t.Fatal("Wrong pruduct code")
-	}
-
-	if lic.UserData == nil {
-		t.Fatal("User data must not be nil")
-	}
-
-	if lic.Version != 1 {
-		t.Fatal("Version must be 1")
-	}
+	require.Equal(t, lic.Name, l.Name, "Invalid name")
+	require.Equal(t, lic.Email, l.Email, "Invalid email")
+	require.NotZero(t, lic.Expiration, "Expiration date must not be zero")
+	require.NotZero(t, lic.MaxBuild, "Max build date must not be zero")
+	require.Equal(t, lic.RunningTimeLimit, l.RunningTimeLimit, "Running time limit must be 47")
+	require.Equal(t, lic.HardwareId, l.HardwareId, "Hardware ID must be defined")
+	require.Equal(t, lic.ProductCode, vmpProductCode, "Wrong pruduct code")
+	require.NotNil(t, lic.UserData, "User data must not be nil")
+	require.Equal(t, lic.Version, l.Version, "Version must be 1")
 }
 func TestMakeLicenseTooLongName(t *testing.T) {
 	private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
@@ -325,41 +275,15 @@ func TestMakeLicenseLongEmail(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if lic.Name != l.Name {
-		t.Fatal("Invalid name")
-	}
-
-	if lic.Email != l.Email {
-		t.Fatal("Invalid email")
-	}
-
-	if lic.Expiration.IsZero() {
-		t.Fatal("Expiration date must not be zero")
-	}
-
-	if lic.MaxBuild.IsZero() {
-		t.Fatal("Max build date must not be zero")
-	}
-
-	if lic.RunningTimeLimit != 47 {
-		t.Fatal("Running time limit must be 47")
-	}
-
-	if !compareByteSlice(lic.HardwareId, l.HardwareId) {
-		t.Fatal("Hardware ID must be defined")
-	}
-
-	if lic.ProductCode != vmpProductCode {
-		t.Fatal("Wrong pruduct code")
-	}
-
-	if lic.UserData == nil {
-		t.Fatal("User data must not be nil")
-	}
-
-	if lic.Version != 1 {
-		t.Fatal("Version must be 1")
-	}
+	require.Equal(t, lic.Name, l.Name, "Invalid name")
+	require.Equal(t, lic.Email, l.Email, "Invalid email")
+	require.NotZero(t, lic.Expiration, "Expiration date must not be zero")
+	require.NotZero(t, lic.MaxBuild, "Max build date must not be zero")
+	require.Equal(t, lic.RunningTimeLimit, l.RunningTimeLimit, "Running time limit must be 47")
+	require.Equal(t, lic.HardwareId, l.HardwareId, "Hardware ID must be defined")
+	require.Equal(t, lic.ProductCode, vmpProductCode, "Wrong pruduct code")
+	require.NotNil(t, lic.UserData, "User data must not be nil")
+	require.Equal(t, lic.Version, l.Version, "Version must be 1")
 }
 func TestMakeLicenseTooLongEmail(t *testing.T) {
 	private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
@@ -402,41 +326,15 @@ func TestMakeLicenseUnicodeInNameAndEmail(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if lic.Name != l.Name {
-		t.Fatal("Invalid name")
-	}
-
-	if lic.Email != l.Email {
-		t.Fatal("Invalid email")
-	}
-
-	if lic.Expiration.IsZero() {
-		t.Fatal("Expiration date must not be zero")
-	}
-
-	if lic.MaxBuild.IsZero() {
-		t.Fatal("Max build date must not be zero")
-	}
-
-	if lic.RunningTimeLimit != 47 {
-		t.Fatal("Running time limit must be 47")
-	}
-
-	if !compareByteSlice(lic.HardwareId, l.HardwareId) {
-		t.Fatal("Hardware ID must be defined")
-	}
-
-	if lic.ProductCode != vmpProductCode {
-		t.Fatal("Wrong pruduct code")
-	}
-
-	if lic.UserData == nil {
-		t.Fatal("User data must not be nil")
-	}
-
-	if lic.Version != 1 {
-		t.Fatal("Version must be 1")
-	}
+	require.Equal(t, lic.Name, l.Name, "Invalid name")
+	require.Equal(t, lic.Email, l.Email, "Invalid email")
+	require.NotZero(t, lic.Expiration, "Expiration date must not be zero")
+	require.NotZero(t, lic.MaxBuild, "Max build date must not be zero")
+	require.Equal(t, lic.RunningTimeLimit, l.RunningTimeLimit, "Running time limit must be 47")
+	require.Equal(t, lic.HardwareId, l.HardwareId, "Hardware ID must be defined")
+	require.Equal(t, lic.ProductCode, vmpProductCode, "Wrong pruduct code")
+	require.NotNil(t, lic.UserData, "User data must not be nil")
+	require.Equal(t, lic.Version, l.Version, "Version must be 1")
 }
 func TestMakeLicenseWithoutProductKey(t *testing.T) {
 	private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="

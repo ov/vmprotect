@@ -301,9 +301,7 @@ func packSerial(l *License, bits int) ([]byte, error) {
 
 		serial = append(serial, 2)
 		serial = append(serial, byte(nameLen))
-		for i := 0; i < nameLen; i++ {
-			serial = append(serial, l.Name[i])
-		}
+		serial = append(serial, l.Name...)
 	}
 
 	if l.Email != "" {
@@ -314,18 +312,14 @@ func packSerial(l *License, bits int) ([]byte, error) {
 
 		serial = append(serial, 3)
 		serial = append(serial, byte(emailLen))
-		for i := 0; i < emailLen; i++ {
-			serial = append(serial, l.Email[i])
-		}
+		serial = append(serial, l.Email...)
 	}
 
 	if len(l.HardwareId) > 0 {
 		serial = append(serial, 4)
 		hdwIDLen := len(l.HardwareId)
 		serial = append(serial, byte(hdwIDLen))
-		for i := 0; i < hdwIDLen; i++ {
-			serial = append(serial, l.HardwareId[i])
-		}
+		serial = append(serial, l.HardwareId...)
 	}
 
 	if !l.Expiration.IsZero() {
@@ -348,9 +342,7 @@ func packSerial(l *License, bits int) ([]byte, error) {
 		}
 
 		serial = append(serial, 7)
-		for i := 0; i < 8; i++ {
-			serial = append(serial, productCode[i])
-		}
+		serial = append(serial, productCode...)
 	}
 
 	if len(l.UserData) > 0 {
@@ -361,9 +353,7 @@ func packSerial(l *License, bits int) ([]byte, error) {
 
 		serial = append(serial, 8)
 		serial = append(serial, byte(userDataLen))
-		for i := 0; i < userDataLen; i++ {
-			serial = append(serial, l.UserData[i])
-		}
+		serial = append(serial, l.UserData...)
 	}
 
 	if !l.MaxBuild.IsZero() {
