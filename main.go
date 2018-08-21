@@ -2,6 +2,7 @@ package vmprotect
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/sha1"
 	"encoding/base64"
 	"errors"
@@ -273,4 +274,153 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 	}
 
 	return license, err
+}
+
+func getCryptoRandInt(max int64) (uint64, error) {
+	nBig, err := rand.Int(rand.Reader, big.NewInt(max))
+	if err != nil {
+		return 0, err
+	}
+
+	return nBig.Uint64(), nil
+}
+
+func packSerial(l *License, bits int) ([]byte, error) {
+	if l.Version != 1 {
+		return nil, errors.New("Unsupported version")
+	}
+
+	serial := make([]byte, 0)
+	serial = append(serial, 1, 1)
+
+	if l.Name != "" {
+		nameLen := len(l.Name)
+		if nameLen > 255 {
+			return nil, errors.New("User name is too long")
+		}
+
+		serial = append(serial, 2)
+		serial = append(serial, byte(nameLen))
+		serial = append(serial, l.Name...)
+	}
+
+	if l.Email != "" {
+		emailLen := len(l.Email)
+		if emailLen > 255 {
+			return nil, errors.New("E-Mail is too long")
+		}
+
+		serial = append(serial, 3)
+		serial = append(serial, byte(emailLen))
+		serial = append(serial, l.Email...)
+	}
+
+	if len(l.HardwareId) > 0 {
+		serial = append(serial, 4)
+		hdwIDLen := len(l.HardwareId)
+		serial = append(serial, byte(hdwIDLen))
+		serial = append(serial, l.HardwareId...)
+	}
+
+	if !l.Expiration.IsZero() {
+		serial = append(serial, 5)
+		serial = append(serial, byte(l.Expiration.Day()))
+		serial = append(serial, byte(l.Expiration.Month()))
+		serial = append(serial, byte(l.Expiration.Year()%256))
+		serial = append(serial, byte(l.Expiration.Year()/256))
+	}
+
+	if l.RunningTimeLimit > 0 {
+		serial = append(serial, 6)
+		serial = append(serial, byte(l.RunningTimeLimit))
+	}
+
+	if l.ProductCode != "" {
+		productCode, err := base64.StdEncoding.DecodeString(l.ProductCode)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid ProductCode decoding: %q", err)
+		}
+
+		serial = append(serial, 7)
+		serial = append(serial, productCode...)
+	}
+
+	if len(l.UserData) > 0 {
+		userDataLen := len(l.UserData)
+		if len(l.UserData) > 255 {
+			return nil, errors.New("User data is too long")
+		}
+
+		serial = append(serial, 8)
+		serial = append(serial, byte(userDataLen))
+		serial = append(serial, l.UserData...)
+	}
+
+	if !l.MaxBuild.IsZero() {
+		serial = append(serial, 9)
+		serial = append(serial, byte(l.MaxBuild.Day()))
+		serial = append(serial, byte(l.MaxBuild.Month()))
+		serial = append(serial, byte(l.MaxBuild.Year()%256))
+		serial = append(serial, byte(l.MaxBuild.Year()/256))
+	}
+
+	var sha1HashArr = sha1.Sum(serial)
+	serial = append(serial, 255)
+	for i := 0; i < 4; i++ {
+		serial = append(serial, sha1HashArr[3-i])
+	}
+
+	nCryptoUInt64, err := getCryptoRandInt(9)
+	if err != nil {
+		return nil, err
+	}
+
+	randSize := 8 + int(nCryptoUInt64)
+	paddingFront := []byte{0, 2}
+	for i := 0; i < randSize; i++ {
+		nCryptoUInt64, err := getCryptoRandInt(256)
+		if err != nil {
+			return nil, err
+		}
+
+		paddingFront = append(paddingFront, byte(1+int(nCryptoUInt64)))
+	}
+	paddingFront = append(paddingFront, 0)
+
+	contentSize := len(serial) + len(paddingFront)
+	rest := bits/8 - contentSize
+	if rest < 0 {
+		return nil, fmt.Errorf("Content is too big to fit in key: %d, maximal allowed is: %d", contentSize, bits/8)
+	}
+
+	paddingBack := make([]byte, 0)
+	for i := 0; i < rest; i++ {
+		nCryptoUInt64, err := getCryptoRandInt(256)
+		if err != nil {
+			return nil, err
+		}
+
+		paddingBack = append(paddingFront, byte(int(nCryptoUInt64)))
+	}
+
+	paddingFront = append(paddingFront, serial...)
+	serial = append(paddingFront, paddingBack...)
+
+	return serial, nil
+}
+
+func MakeLicense(l *License, private, modulus string, bits int) (string, error) {
+	packedSerial, err := packSerial(l, bits)
+	if err != nil {
+		return "", err
+	}
+
+	strRes, err := decodeSerial(string(packedSerial), private, modulus)
+	if err != nil {
+		return "", err
+	}
+
+	strPackedSerial := base64.StdEncoding.EncodeToString([]byte(strRes))
+
+	return strPackedSerial, nil
 }
