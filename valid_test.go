@@ -1,7 +1,6 @@
 ﻿package vmprotect
 
 import (
-	"strings"
 	"testing"
 	"time"
 
@@ -85,7 +84,7 @@ func TestMakeLicense(t *testing.T) {
 	require.Nil(t, err, "The serial number is valid, it should be parsed well")
 
 	lic, err := ParseLicense(serial, vmpPublic, vmpModulus, vmpProductCode, vmpBits)
-	require.Nil(t, err, err)
+	require.Nil(t, err)
 
 	require.Equal(t, lic.Name, l.Name, "Invalid name")
 	require.Equal(t, lic.Email, l.Email, "Invalid email")
@@ -114,7 +113,7 @@ func TestMakeLicenseLongName(t *testing.T) {
 	require.Nil(t, err, "The serial number is valid, it should be parsed well")
 
 	lic, err := ParseLicense(serial, vmpPublic, vmpModulus, vmpProductCode, vmpBits)
-	require.Nil(t, err, err)
+	require.Nil(t, err)
 
 	require.Equal(t, lic.Name, l.Name, "Invalid name")
 	require.Equal(t, lic.Email, l.Email, "Invalid email")
@@ -126,6 +125,7 @@ func TestMakeLicenseLongName(t *testing.T) {
 	require.NotNil(t, lic.UserData, "User data must not be nil")
 	require.Equal(t, lic.Version, l.Version, "Version must be 1")
 }
+
 func TestMakeLicenseTooLongName(t *testing.T) {
 	private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
 	l := new(License)
@@ -140,7 +140,8 @@ func TestMakeLicenseTooLongName(t *testing.T) {
 	l.Version = 1
 
 	_, err := MakeLicense(l, private, vmpModulus, vmpBits)
-	require.True(t, strings.HasPrefix(err.Error(), "Content is too big to fit in key"), "Wrong error message")
+	require.NotNil(t, err)
+	require.Contains(t, err.Error(), "Content is too big to fit the key")
 }
 func TestMakeLicenseLongEmail(t *testing.T) {
 	private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
@@ -159,7 +160,7 @@ func TestMakeLicenseLongEmail(t *testing.T) {
 	require.Nil(t, err, "The serial number is valid, it should be parsed well")
 
 	lic, err := ParseLicense(serial, vmpPublic, vmpModulus, vmpProductCode, vmpBits)
-	require.Nil(t, err, err)
+	require.Nil(t, err)
 
 	require.Equal(t, lic.Name, l.Name, "Invalid name")
 	require.Equal(t, lic.Email, l.Email, "Invalid email")
@@ -185,8 +186,10 @@ func TestMakeLicenseTooLongEmail(t *testing.T) {
 	l.Version = 1
 
 	_, err := MakeLicense(l, private, vmpModulus, vmpBits)
-	require.True(t, strings.HasPrefix(err.Error(), "Content is too big to fit in key"), "Wrong error message")
+	require.NotNil(t, err)
+	require.Contains(t, err.Error(), "Content is too big to fit the key")
 }
+
 func TestMakeLicenseUnicodeInNameAndEmail(t *testing.T) {
 	private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
 	l := new(License)
@@ -204,7 +207,7 @@ func TestMakeLicenseUnicodeInNameAndEmail(t *testing.T) {
 	require.Nil(t, err, "The serial number is valid, it should be parsed well")
 
 	lic, err := ParseLicense(serial, vmpPublic, vmpModulus, vmpProductCode, vmpBits)
-	require.Nil(t, err, err)
+	require.Nil(t, err)
 
 	require.Equal(t, lic.Name, l.Name, "Invalid name")
 	require.Equal(t, lic.Email, l.Email, "Invalid email")
@@ -216,6 +219,7 @@ func TestMakeLicenseUnicodeInNameAndEmail(t *testing.T) {
 	require.NotNil(t, lic.UserData, "User data must not be nil")
 	require.Equal(t, lic.Version, l.Version, "Version must be 1")
 }
+
 func TestMakeLicenseWithoutProductKey(t *testing.T) {
 	private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
 	l := new(License)
@@ -232,5 +236,6 @@ func TestMakeLicenseWithoutProductKey(t *testing.T) {
 	require.Nil(t, err, "The serial number is valid, it should be parsed well")
 
 	_, err = ParseLicense(serial, vmpPublic, vmpModulus, vmpProductCode, vmpBits)
-	require.Equal(t, err.Error(), "Incomplete serial number", err)
+	require.NotNil(t, err)
+	require.Equal(t, "Incomplete serial number", err.Error())
 }

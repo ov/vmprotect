@@ -32,7 +32,7 @@ func base10Encode(str []byte) string {
 	return result.String()
 }
 
-func base10Decode(data *big.Int) string {
+func base10Decode(data *big.Int) []byte {
 	var buffer bytes.Buffer
 
 	var res string
@@ -50,7 +50,7 @@ func base10Decode(data *big.Int) string {
 		buffer = _buffer
 	}
 
-	return buffer.String()
+	return buffer.Bytes()
 }
 
 func powmod(_base string, _exponent string, _modulus string) (*big.Int, error) {
@@ -105,26 +105,26 @@ func powmod(_base string, _exponent string, _modulus string) (*big.Int, error) {
 	return result, nil
 }
 
-func decodeSerial(strbin, public, modulus string) (string, error) {
+func decodeSerial(strbin, public, modulus string) ([]byte, error) {
 	_modulus, err := base64.StdEncoding.DecodeString(modulus)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("Error in decodeSerial, can't base64 decode modulus: %v", modulus))
+		return nil, errors.New(fmt.Sprintf("Error in decodeSerial, can't base64 decode modulus: %v", modulus))
 	}
 
 	_public, err := base64.StdEncoding.DecodeString(public)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("Error in decodeSerial, can't base64 decode public: %v", public))
+		return nil, errors.New(fmt.Sprintf("Error in decodeSerial, can't base64 decode public: %v", public))
 	}
 
 	res, err := powmod(base10Encode([]byte(strbin)), base10Encode(_public), base10Encode(_modulus))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return base10Decode(res), nil
 }
 
-func unpackSerial(strbin string) (*License, error) {
+func unpackSerial(strbin []byte) (*License, error) {
 	var license = new(License)
 
 	//skip front padding until \0
@@ -144,50 +144,82 @@ func unpackSerial(strbin string) (*License, error) {
 	var start = i
 	var end int = 0
 
-	for i := start; i < len(strbin); {
-		ch := int(strbin[i])
+	for i := start; i < len(strbin) && end == 0; {
+		ch := strbin[i]
 		i++
 
-		if ch == 1 {
+		switch ch {
+
+		case 1:
 			license.Version = int(strbin[i])
 			i++
-		} else if ch == 2 {
-			lenght := int(strbin[i])
+
+		case 2:
+			length := int(strbin[i])
 			i++
-			license.Name = strbin[i : i+lenght]
-			i += lenght
-		} else if ch == 3 {
-			lenght := int(strbin[i])
+			if i+length > len(strbin) {
+				return nil, fmt.Errorf("Error parsing name chunk. Start position = %d, length = %d, total data size = %d", i, length, len(strbin))
+			}
+			license.Name = string(strbin[i : i+length])
+			i += length
+
+		case 3:
+			length := int(strbin[i])
 			i++
-			license.Email = strbin[i : i+lenght]
-			i += lenght
-		} else if ch == 4 {
-			lenght := int(strbin[i])
+			if i+length > len(strbin) {
+				return nil, fmt.Errorf("Error parsing email chunk. Start position = %d, length = %d, total data size = %d", i, length, len(strbin))
+			}
+			license.Email = string(strbin[i : i+length])
+			i += length
+
+		case 4:
+			length := int(strbin[i])
 			i++
-			license.HardwareId = []byte(strbin[i : i+8])
-			i += lenght
-		} else if ch == 5 {
+			if i+length > len(strbin) {
+				return nil, fmt.Errorf("Error parsing hardware id chunk. Start position = %d, length = %d, total data size = %d", i, length, len(strbin))
+			}
+			license.HardwareId = []byte(strbin[i : i+length])
+			i += length
+
+		case 5:
+			if i+4 > len(strbin) {
+				return nil, fmt.Errorf("Error parsing expiration chunk. Start position = %d, length = 4, total data size = %d", i, len(strbin))
+			}
 			license.Expiration = time.Date(int(strbin[i+2])+int(strbin[i+3])*256, time.Month(int(strbin[i+1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
 			i += 4
-		} else if ch == 6 {
+
+		case 6:
 			license.RunningTimeLimit = int(strbin[i])
 			i++
-		} else if ch == 7 {
+
+		case 7:
+			if i+8 > len(strbin) {
+				return nil, fmt.Errorf("Error parsing product code chunk. Start position = %d, length = 8, total data size = %d", i, len(strbin))
+			}
 			license.ProductCode = base64.StdEncoding.EncodeToString([]byte(strbin[i : i+8]))
 			i += 8
-		} else if ch == 8 {
-			lenght := int(strbin[i])
+
+		case 8:
+			length := int(strbin[i])
 			i++
-			license.UserData = []byte(strbin[i : i+lenght])
-			i += lenght
-		} else if ch == 9 {
+			if i+length > len(strbin) {
+				return nil, fmt.Errorf("Error parsing user data chunk. Start position = %d, length = %d, total data size = %d", i, length, len(strbin))
+			}
+			license.UserData = []byte(strbin[i : i+length])
+			i += length
+
+		case 9:
+			if i+4 > len(strbin) {
+				return nil, fmt.Errorf("Error parsing max build chunk. Start position = %d, length = 4, total data size = %d", i, len(strbin))
+			}
 			license.MaxBuild = time.Date(int(strbin[i+2])+int(strbin[i+3])*256, time.Month(int(strbin[i+1])), int(strbin[i]), 0, 0, 0, 0, time.UTC)
 			i += 4
-		} else if ch == 255 {
+
+		case 255:
 			end = i - 1
-			break
-		} else {
-			return nil, errors.New(fmt.Sprintf("Serial number parsing error (chunk): %d %d %d", start, i, ch))
+
+		default:
+			return nil, fmt.Errorf("Unknown chunk %d at position %d+%d", ch, start, i-start)
 		}
 	}
 
@@ -276,13 +308,28 @@ func ParseLicense(serial, public, modulus, productCode string, bits int) (*Licen
 	return license, err
 }
 
-func getCryptoRandInt(max int64) (uint64, error) {
-	nBig, err := rand.Int(rand.Reader, big.NewInt(max))
+func randomByte(min, max byte) (byte, error) {
+	if max <= min {
+		return 0, fmt.Errorf("Invalid random number range: [%d, %d]", min, max)
+	}
+
+	dist := int64(max) - int64(min) + 1
+	n, err := rand.Int(rand.Reader, big.NewInt(dist))
 	if err != nil {
 		return 0, err
 	}
 
-	return nBig.Uint64(), nil
+	if !n.IsInt64() {
+		return 0, fmt.Errorf("The random number is too big to fit into int64: %q", n)
+	}
+
+	res64 := n.Int64() + int64(min)
+
+	if res64 < 0 || res64 > 255 {
+		return 0, fmt.Errorf("The random number does not fit into the byte: %q", res64)
+	}
+
+	return byte(res64), nil
 }
 
 func packSerial(l *License, bits int) ([]byte, error) {
@@ -290,35 +337,35 @@ func packSerial(l *License, bits int) ([]byte, error) {
 		return nil, errors.New("Unsupported version")
 	}
 
-	serial := make([]byte, 0)
-	serial = append(serial, 1, 1)
+	serial := []byte{0x01, 0x01} // version tag
 
 	if l.Name != "" {
-		nameLen := len(l.Name)
-		if nameLen > 255 {
+		length := len(l.Name)
+		if length > 255 {
 			return nil, errors.New("User name is too long")
 		}
 
 		serial = append(serial, 2)
-		serial = append(serial, byte(nameLen))
+		serial = append(serial, byte(length))
 		serial = append(serial, l.Name...)
 	}
 
 	if l.Email != "" {
-		emailLen := len(l.Email)
-		if emailLen > 255 {
+		length := len(l.Email)
+		if length > 255 {
 			return nil, errors.New("E-Mail is too long")
 		}
 
 		serial = append(serial, 3)
-		serial = append(serial, byte(emailLen))
+		serial = append(serial, byte(length))
 		serial = append(serial, l.Email...)
 	}
 
 	if len(l.HardwareId) > 0 {
+		length := len(l.HardwareId)
+
 		serial = append(serial, 4)
-		hdwIDLen := len(l.HardwareId)
-		serial = append(serial, byte(hdwIDLen))
+		serial = append(serial, byte(length))
 		serial = append(serial, l.HardwareId...)
 	}
 
@@ -338,7 +385,11 @@ func packSerial(l *License, bits int) ([]byte, error) {
 	if l.ProductCode != "" {
 		productCode, err := base64.StdEncoding.DecodeString(l.ProductCode)
 		if err != nil {
-			return nil, fmt.Errorf("Invalid ProductCode decoding: %q", err)
+			return nil, fmt.Errorf("Product Code decoding error: %q", err)
+		}
+
+		if len(productCode) != 8 {
+			return nil, fmt.Errorf("Invalid Product Code, length is %d, not 8", len(productCode))
 		}
 
 		serial = append(serial, 7)
@@ -346,13 +397,13 @@ func packSerial(l *License, bits int) ([]byte, error) {
 	}
 
 	if len(l.UserData) > 0 {
-		userDataLen := len(l.UserData)
-		if len(l.UserData) > 255 {
-			return nil, errors.New("User data is too long")
+		length := len(l.UserData)
+		if length > 255 {
+			return nil, fmt.Errorf("User data is too long (%d bytes)", length)
 		}
 
 		serial = append(serial, 8)
-		serial = append(serial, byte(userDataLen))
+		serial = append(serial, byte(length))
 		serial = append(serial, l.UserData...)
 	}
 
@@ -364,49 +415,47 @@ func packSerial(l *License, bits int) ([]byte, error) {
 		serial = append(serial, byte(l.MaxBuild.Year()/256))
 	}
 
-	var sha1HashArr = sha1.Sum(serial)
+	hash := sha1.Sum(serial)
 	serial = append(serial, 255)
 	for i := 0; i < 4; i++ {
-		serial = append(serial, sha1HashArr[3-i])
+		serial = append(serial, hash[3-i])
 	}
 
-	nCryptoUInt64, err := getCryptoRandInt(9)
+	paddingFront := []byte{0x00, 0x02}
+
+	paddingSize, err := randomByte(8, 16)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error getting random byte: %q", err)
 	}
 
-	randSize := 8 + int(nCryptoUInt64)
-	paddingFront := []byte{0, 2}
-	for i := 0; i < randSize; i++ {
-		nCryptoUInt64, err := getCryptoRandInt(256)
+	for i := 0; i < int(paddingSize); i++ {
+		rb, err := randomByte(1, 255)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error getting random byte: %q", err)
 		}
-
-		paddingFront = append(paddingFront, byte(1+int(nCryptoUInt64)))
+		paddingFront = append(paddingFront, rb)
 	}
+
 	paddingFront = append(paddingFront, 0)
 
 	contentSize := len(serial) + len(paddingFront)
 	rest := bits/8 - contentSize
 	if rest < 0 {
-		return nil, fmt.Errorf("Content is too big to fit in key: %d, maximal allowed is: %d", contentSize, bits/8)
+		return nil, fmt.Errorf("Content is too big to fit the key: %d, maximum size is: %d", contentSize, bits/8)
 	}
 
-	paddingBack := make([]byte, 0)
+	paddingBack := []byte{}
 	for i := 0; i < rest; i++ {
-		nCryptoUInt64, err := getCryptoRandInt(256)
+		rb, err := randomByte(0, 255)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error getting random byte: %q", err)
 		}
 
-		paddingBack = append(paddingFront, byte(int(nCryptoUInt64)))
+		paddingBack = append(paddingBack, rb)
 	}
 
-	paddingFront = append(paddingFront, serial...)
-	serial = append(paddingFront, paddingBack...)
-
-	return serial, nil
+	res := append(paddingFront, append(serial, paddingBack...)...)
+	return res, nil
 }
 
 func MakeLicense(l *License, private, modulus string, bits int) (string, error) {
