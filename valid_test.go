@@ -141,7 +141,7 @@ func TestMakeLicenseTooLongName(t *testing.T) {
 
 	_, err := MakeLicense(l, private, vmpModulus, vmpBits)
 	require.NotNil(t, err)
-	require.Contains(t, err.Error(), "Content is too big to fit the key")
+	require.Contains(t, err.Error(), "content is too big to fit the key")
 }
 func TestMakeLicenseLongEmail(t *testing.T) {
 	private := "BM8O4xm4nIAt5YxYzcYnNBpYYUP05xAnmrkgzIir2lCbtMoQ4/WM3q5e6zzqUQQHmVXmeufYpp9Pqufkd31LM5z7II3SQDWnLRpKCwwtKMS7J9rMAVGQUEJRj1Pg9kOOGqoJUSHBp5T+HW4jIG17GU0g3hVVso01KXBa1k7gu1HiL/NbNZK8hdGz45cRp+J3PhJRg3o8Lwm8PHfIi486rXrLmbi0J9Xw5lH+VItebpRP0OqjDSv4/6uaNMZnztnGBPptBlXfQnT+Xm7ocI3Bqgv1jan1fIwn9skla5H7m1prpSK3KL9tyuACKM+isNfyrgCm5bYoKHn4mCqB08INsQ=="
@@ -187,7 +187,7 @@ func TestMakeLicenseTooLongEmail(t *testing.T) {
 
 	_, err := MakeLicense(l, private, vmpModulus, vmpBits)
 	require.NotNil(t, err)
-	require.Contains(t, err.Error(), "Content is too big to fit the key")
+	require.Contains(t, err.Error(), "content is too big to fit the key")
 }
 
 func TestMakeLicenseUnicodeInNameAndEmail(t *testing.T) {
@@ -237,5 +237,5 @@ func TestMakeLicenseWithoutProductKey(t *testing.T) {
 
 	_, err = ParseLicense(serial, vmpPublic, vmpModulus, vmpProductCode, vmpBits)
 	require.NotNil(t, err)
-	require.Equal(t, "Incomplete serial number", err.Error())
+	require.Equal(t, "incomplete serial number", err.Error())
 }
